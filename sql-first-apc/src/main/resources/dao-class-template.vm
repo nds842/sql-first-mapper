@@ -1,0 +1,50 @@
+package $classPackage;
+
+import com.github.nds842.sqlfirst.base.QueryExecutor;
+
+#if($hasDtoClasses)
+import ${classPackage}.dto.*;
+#end
+import java.util.List;
+import java.sql.Connection;
+
+import com.github.nds842.sqlfirst.queryexecutor.*;
+import $baseClassFullName;
+#foreach($className in $implementsFullList)
+import ${className};
+#end
+
+public class $daoClassName extends $baseClassSimpleName #if($implementsNameList)implements#end #foreach($className in $implementsNameList)
+${className}#if($foreach.hasNext), #end
+#end {
+
+    private static final String PACKAGE_NAME = "$classPackage";
+
+    private static ${daoClassName} INSTANCE = new ${daoClassName}();
+
+    private ${daoClassName}() {}
+
+    public static ${daoClassName} getIntance(){
+        return INSTANCE;
+    }
+
+#macro( tr $method )
+#if(${method.hasResponse()})
+        QueryResultTransformer<${method.responseClass()}> tr = (rs, rsNames) -> {
+            ${method.responseClass()} dto = new ${method.responseClass()}();
+#foreach ($field in $method.responseParamList)
+            dto.set${field.nameFirstUpper}(get${field.simpleTypeName()}Safely(rs, rsNames, ${method.responseClass()}.$field.nameUnderscores));
+#end
+            return dto;
+        };
+#end
+#end
+
+#foreach ($method in $queryDescList)
+$method.methodJavadoc
+    public #if(${method.hasResponse()})List<${method.responseClass()}>#{else}void#end ${method.methodName}(#if(${method.hasRequest()})${method.requestClass()} req,#end Connection conn) {
+#tr()
+        #if(${method.hasResponse()})return super.executeQuery#{else}super.executeUpdate#{end}(getTemplate(PACKAGE_NAME, "${method.getMethodNameFirstUpper()}")#if(${method.hasRequest()}), req#{end}#if(${method.hasResponse()}), tr#end, conn);
+    }
+
+#end}

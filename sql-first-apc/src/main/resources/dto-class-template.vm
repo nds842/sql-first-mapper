@@ -1,0 +1,34 @@
+package ${classPackage};
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
+
+$classJavadoc
+public class $dtoClassName extends $baseDtoClass {
+
+#foreach ($field in $fields)
+    public static final String $field.nameUnderscores = "$field.realName";
+#end
+
+    private Map<String, Object> map = new HashMap<>();
+
+#foreach ($field in $fields)
+    public $field.columnTypeName get${field.nameFirstUpper}(){
+        return getValue(map, $field.nameUnderscores);
+    }
+
+    public void set${field.nameFirstUpper}($field.columnTypeName $field.name){
+         map.put($field.nameUnderscores, $field.name);
+    }
+
+    public $dtoClassName with${field.nameFirstUpper}($field.columnTypeName $field.name){
+         map.put($field.nameUnderscores, $field.name);
+         return this;
+    }
+
+#end
+    public Map<String, Object> toMap() {
+        return Collections.unmodifiableMap(map);
+    }
+}
