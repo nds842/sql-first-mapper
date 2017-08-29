@@ -22,7 +22,7 @@ public class LetterSampleTest {
 
     private Connection conn;
 
-    String SOMENAME = "somename";
+    private String SOMENAME = "somename";
 
     @BeforeTest
     private void beforeTest() throws Exception {
@@ -44,14 +44,15 @@ public class LetterSampleTest {
         dao.deleteSampleLetter(conn);
 
         InsertSampleLetterReq insertReq = new InsertSampleLetterReq();
-
-        insertReq.withWidth(4L).withHeight(10L).withWeight(11L).withSendDate(new Date()).withSenderName(SOMENAME);
+        insertReq.setHeight(10L);
+        insertReq.withWidth(4L).withWeight(11L).withSendDate(new Date()).withSenderName(SOMENAME);
         dao.insertSampleLetter(insertReq, conn);
 
-        List<FindSampleLetterRes> foundList = dao.findSampleLetter(new FindSampleLetterReq().withSender(SOMENAME).withWidth(4L).withHeight(10L), conn);
+        FindSampleLetterReq findReq = new FindSampleLetterReq().withSender(SOMENAME).withWidth(4L).withHeight(10L);
+        List<FindSampleLetterRes> foundList = dao.findSampleLetter(findReq, conn);
 
         Assert.assertEquals(foundList.size(), 1);
-        Assert.assertEquals(foundList.get(0).toMap(), insertReq.toMap(), foundList.toString());
+        Assert.assertEquals(foundList.get(0).getWeight(), insertReq.getWeight());
     }
 
 
