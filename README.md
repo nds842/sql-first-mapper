@@ -71,3 +71,5 @@ try (Connection conn = obtainConnection()) {
 ```
 
 This is an early draft of concept proof, hope that someone might find it interesting and will help moving it towards production ready release :)
+
+See the tests and usage example in `plain-sql-sample` module.
