@@ -3,6 +3,7 @@ package com.github.nds842.sqlfirst.parcelsample;
 
 import com.github.nds842.sqlfirst.apc.SqlSource;
 import com.github.nds842.sqlfirst.apc.SqlSourceFile;
+import com.github.nds842.sqlfirst.interfaces.SenderNameItem;
 import com.github.nds842.sqlfirst.parcelsample.dto.FindSampleParcelReq;
 import com.github.nds842.sqlfirst.parcelsample.dto.FindSampleParcelRes;
 import com.github.nds842.sqlfirst.parcelsample.dto.InsertSampleParcelReq;
@@ -27,7 +28,7 @@ public interface ParcelSample {
      *   #if(${height__l})      AND parcel.height = :height__l      #end
      *   #if(${start_date__d})  AND parcel.date_send  between :start_date__d and :end_date__d #end
      */
-    @SqlSource
+    @SqlSource(resImpl = SenderNameItem.class)
     List<FindSampleParcelRes> findSampleParcel(FindSampleParcelReq req, Connection conn);
 
     /**

@@ -3,20 +3,23 @@ package com.github.nds842.sqlfirst.base;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * SQL query description
+ */
 public class QueryDesc {
 
     private String query;
     private String queryName;
-    private String methodName;
+    private String className;
+    private String packageName;
+
     private List<ParamDesc> responseParamList;
     private List<ParamDesc> requestParamList;
-    private String methodJavadoc;
-    private String classJavadoc;
-    private String packageName;
-    private String className;
+    private List<String> reqImplementsList = new ArrayList<>();
+    private List<String> resImplementsList = new ArrayList<>();
 
     public void setResponseParamList(List<ParamDesc> responseParamList) {
         this.responseParamList = responseParamList;
@@ -35,7 +38,7 @@ public class QueryDesc {
     }
 
     public String getMethodName() {
-        return methodName;
+        return MiscUtils.prepareNameString(queryName);
     }
 
     public String getQuery() {
@@ -44,21 +47,18 @@ public class QueryDesc {
 
     public void setQuery(String query) {
         this.query = query;
-        this.methodJavadoc = MiscUtils.prepareJavadoc(query, 4);
-        this.classJavadoc = MiscUtils.prepareJavadoc(query, 0);
     }
 
     public String getClassJavadoc() {
-        return classJavadoc;
+        return MiscUtils.prepareJavadoc(query, 0);
     }
 
     public void setQueryName(String queryName) {
         this.queryName = queryName;
-        this.methodName = MiscUtils.prepareNameString(queryName);
     }
 
     public String getMethodNameFirstUpper() {
-        return StringUtils.capitalize(methodName);
+        return StringUtils.capitalize(getMethodName());
     }
 
     public void setPackageName(String packageName) {
@@ -69,15 +69,18 @@ public class QueryDesc {
         return packageName;
     }
 
+    /**
+     * @return Javadoc for Dao class method
+     */
     public String getMethodJavadoc() {
-        return methodJavadoc;
+        return MiscUtils.prepareJavadoc(query, 4);
     }
 
-    public boolean hasRequest(){
+    public boolean hasRequest() {
         return CollectionUtils.isNotEmpty(requestParamList);
     }
 
-    public boolean hasResponse(){
+    public boolean hasResponse() {
         return CollectionUtils.isNotEmpty(responseParamList);
     }
 
@@ -89,11 +92,11 @@ public class QueryDesc {
         return getMethodNameFirstUpper() + "Req";
     }
 
-    public String getMethodNameUnderscores(){
-        return MiscUtils.underscores(methodName);
+    public String getMethodNameUnderscores() {
+        return MiscUtils.underscores(getMethodName());
     }
 
-    public String getQueryEscaped(){
+    public String getQueryEscaped() {
         return MiscUtils.escape(query);
     }
 
@@ -109,9 +112,24 @@ public class QueryDesc {
         return className;
     }
 
-    @Override
-    public String toString() {
-        return "req: " + requestParamList + ", res: "+responseParamList;
+    public List<String> getReqImplementsList() {
+        return reqImplementsList;
     }
 
+    public void setReqImplementsList(List<String> reqImplementsList) {
+        this.reqImplementsList = reqImplementsList;
+    }
+
+    public List<String> getResImplementsList() {
+        return resImplementsList;
+    }
+
+    public void setResImplementsList(List<String> resImplementsList) {
+        this.resImplementsList = resImplementsList;
+    }
+
+    @Override
+    public String toString() {
+        return queryName + " req: " + requestParamList + ", res: " + responseParamList;
+    }
 }

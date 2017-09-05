@@ -1,6 +1,7 @@
 package com.github.nds842.sqlfirst.parcelsample;
 
 import com.github.nds842.sqlfirst.initdbsample.InitDbSampleDao;
+import com.github.nds842.sqlfirst.interfaces.SenderNameItem;
 import com.github.nds842.sqlfirst.parcelsample.dto.FindSampleLetterReq;
 import com.github.nds842.sqlfirst.parcelsample.dto.FindSampleLetterRes;
 import com.github.nds842.sqlfirst.parcelsample.dto.FindSampleParcelReq;
@@ -58,6 +59,8 @@ public class LetterSampleTest {
 
     @Test
     public void testParcel() throws SQLException {
+
+        Assert.assertTrue(SenderNameItem.class.isAssignableFrom(FindSampleParcelRes.class));
         ParcelSampleDao dao = ParcelSampleDao.getIntance();
 
         LetterSampleDao.getIntance().deleteSampleLetter(conn);

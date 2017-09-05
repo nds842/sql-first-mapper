@@ -4,6 +4,29 @@ Use @SqlSource annotation to generate java classes from plain SQL.
  
 You can even place your SQL to Javadoc. One little thing to do is to add type defining suffixes to parameters and result fields of SQL query.     
 
+### 1. Write sql
+```dbn-sql
+SELECT
+    letter.date_send       send_date
+    letter.sender_name     sender_name
+FROM letter WHERE
+ sender_name = :sender
+ AND letter.date_send  between :start_date and :end_date
+```
+###2. Add type suffixes to sql request and response parameters
+```dbn-sql
+SELECT
+     letter.date_send       send_date__d,
+     letter.sender_name     sender_name__s
+FROM letter WHERE
+  sender_name = :sender__s
+  #if(${start_date__d})  AND letter.date_send  >  :start_date__d #end
+```
+Velocity markup can be used to create dynamic SQL queries, in this example `start_date` condition will be applied only if not null value is passed 
+as `start_date` parameter
+
+###3. Put prepared SQL to javadoc of @SqlSource annotated method 
+
 ```java
 @SqlSourceFile
 public interface LetterSample {
@@ -14,28 +37,57 @@ public interface LetterSample {
      *      letter.sender_name     sender_name__s
      * FROM letter WHERE
      *   sender_name = :sender__s
-     *   #if(${start_date__d})  AND letter.date_send  between :start_date__d and :end_date__d #end
+     *   #if(${start_date__d})  AND letter.date_send  > :start_date__d #end
      */
     @SqlSource
     void findSampleLetter();
-
-    /**
-     * INSERT into letter (sender_name, date_send) 
-     * VALUES (:sender_name__s, :send_date__d)
-     */
-    @SqlSource
-    void insertSampleLetter(InsertSampleLetterReq req, Connection conn);
-
 }
 ```
 
-Having maven dependency added just compile your project, `Dao` and `Request` and `Response` classes will be generated at compile time: 
-
+###4. Compile project - get query Request and Response parameters as Java objects and Repository methods 
+Add maven dependency:
+``` 
+<dependency>
+   <groupId>com.gitgub.nds842</groupId>
+   <artifactId>sql-first-apc</artifactId>
+   <version>1.0-SNAPSHOT</version>
+</dependency>
+```
+Compile and check that files are created in `target/generated-sources` folder:
 ```java
-public class LetterSampleDao extends BaseDao   {
-    
-    //some lines skipped
+public class FindSampleLetterRes extends com.github.nds842.sqlfirst.base.BaseDto {
+    //lines skipped
+    public java.util.Date getStartDate(){
+        return getValue(map, SEND_DATE);
+    }
+    public void setSendDate(java.util.Date sendDate){
+         map.put(SEND_DATE, sendDate);
+    }
+    public java.lang.String getSenderName(){
+        return getValue(map, SENDER_NAME);
+    }
+    public void setSenderName(java.lang.String senderName){
+         map.put(SENDER_NAME, senderName);
+    }
+}
+public class FindSampleLetterReq extends com.github.nds842.sqlfirst.base.BaseDto {
+    //lines skipped
+    public java.lang.String getSender(){
+       return getValue(map, SENDER);
+    }  
+    public void setSender(java.lang.String sender){
+        map.put(SENDER, sender);
+    }    
+    public java.util.Date getStartDate(){
+       return getValue(map, START_DATE);
+    }
+    public void setStartDate(java.util.Date startDate){
+        map.put(START_DATE, startDate);
+    }
+ }
 
+public class LetterSampleDao extends BaseDao   { 
+    //some lines skipped
     public List<FindSampleLetterRes> findSampleLetter(FindSampleLetterReq req, Connection conn) {
         QueryResultTransformer<FindSampleLetterRes> tr = (rs, rsNames) -> {
             FindSampleLetterRes dto = new FindSampleLetterRes();
@@ -45,30 +97,9 @@ public class LetterSampleDao extends BaseDao   {
         };
         return super.executeQuery(getTemplate(PACKAGE_NAME, "FindSampleLetter"), req, tr, conn);
     }
-
-    public void insertSampleLetter(InsertSampleLetterReq req, Connection conn) {
-        super.executeUpdate(getTemplate(PACKAGE_NAME, "InsertSampleLetter"), req, conn);
-    }
 }
 ```
 
-Dao layer is ready to be used:
-
-```java
-try (Connection conn = obtainConnection()) {
-    LetterSampleDao dao = LetterSampleDao.getInstance();
-    InsertSampleLetterReq insertReq = new InsertSampleLetterReq().withSenderName(someName);
-    insertReq.setSendDate(someDate);
-    dao.insertSampleLetter(insertReq, conn);
-    
-    FindSampleLetterReq findReq = new FindSampleLetterReq().withSender(someName);
-    List<FindSampleLetterRes> foundList = dao.findSampleLetter(findReq, conn);
-    
-    Assert.assertEquals(foundList.size(), 1);
-    Assert.assertEquals(foundList.get(0).getSendDate(), someDate);
-    Assert.assertEquals(foundList.get(0).getSenderName(), someName);
-}
-```
 
 This is an early draft of concept proof, hope that someone might find it interesting and will help moving it towards production ready release :)
 

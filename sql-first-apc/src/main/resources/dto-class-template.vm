@@ -4,8 +4,14 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
 
+#foreach($className in $implementsFullList)
+import ${className};
+#end
+
 $classJavadoc
-public class $dtoClassName extends $baseDtoClass {
+public class $dtoClassName extends $baseDtoClass#if($implementsNameList) implements #end#foreach($className in $implementsNameList)
+${className}#if($foreach.hasNext), #end
+#end {
 
 #foreach ($field in $fields)
     public static final String $field.nameUnderscores = "$field.realName";

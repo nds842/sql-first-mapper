@@ -13,10 +13,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+/**
+ * This class creates QueryDesc object bas
+ */
 public class SuffixParser implements QueryDescParser {
 
-    //TODO think of pattern (?!\\B'[^']*)(:\\w+)(?![^']*'\\B)
     private Pattern requestRegexp = Pattern.compile("[:{$]{1}\\b((\\w+)__\\w)\\b");
     private Pattern responseRegexp = Pattern.compile("(?<![:{$])\\b((\\w+)__\\w)\\b");
 

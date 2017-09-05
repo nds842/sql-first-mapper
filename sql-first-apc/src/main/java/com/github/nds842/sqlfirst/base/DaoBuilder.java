@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -34,7 +36,7 @@ public class DaoBuilder {
             List<QueryDesc> queryDescList,
             String baseDaoClassName,
             String baseDtoClassName,
-            Map<String, Set<String>> implementMap) {
+            Map<String, String> implementMap) {
 
         Collection<List<QueryDesc>> groupsByClass = queryDescList.stream().collect(
                 Collectors.groupingBy(
@@ -84,6 +86,10 @@ public class DaoBuilder {
             String methodNameUpper = StringUtils.capitalize(queryDesc.getMethodName());
             String dtoClassName = methodNameUpper + (isReq ? "Req" : "Res");
             String packageName = queryDesc.getPackageName() + ".dto";
+
+            List<String> implementsList = isReq ? queryDesc.getReqImplementsList() : queryDesc.getResImplementsList();
+            processImplementsList(context, new HashSet<>(implementsList));
+
             context.put("dtoClassName", dtoClassName);
             context.put("classPackage", packageName);
             context.put("classJavadoc", queryDesc.getClassJavadoc());
@@ -101,7 +107,7 @@ public class DaoBuilder {
         }
     }
 
-    private void createDaoClass(List<QueryDesc> queryDescList, String baseDaoClassName, Map<String, Set<String>> implementMap) {
+    private void createDaoClass(List<QueryDesc> queryDescList, String baseDaoClassName, Map<String, String> implementMap) {
         QueryDesc firstElement = queryDescList.iterator().next();
 
         VelocityContext context = new VelocityContext();
@@ -113,10 +119,9 @@ public class DaoBuilder {
             context.put("hasDtoClasses", queryDescList.stream().anyMatch(queryDesc -> queryDesc.hasRequest() || queryDesc.hasRequest()));
             context.put("queryDescList", queryDescList);
             context.put("daoClassName", daoClassName);
-            Set<String> implList = implementMap.get(className);
-            if (CollectionUtils.isNotEmpty(implList)) {
-                context.put("implementsFullList", implList);
-                context.put("implementsNameList", implList.stream().map(MiscUtils::getLastWordAfterDot).collect(Collectors.toList()));
+            String implementClassName = implementMap.get(className);
+            if (StringUtils.isNotBlank(implementClassName)) {
+                processImplementsList(context, Collections.singleton(implementClassName));
             }
             context.put("classPackage", packageName);
             context.put("baseClassFullName", baseDaoClassName);
@@ -131,6 +136,14 @@ public class DaoBuilder {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private void processImplementsList(VelocityContext context, Set<String> implementsList) {
+        if (CollectionUtils.isEmpty(implementsList)) {
+            return;
+        }
+        context.put("implementsFullList", implementsList.stream().sorted().collect(Collectors.toList()));
+        context.put("implementsNameList", implementsList.stream().map(MiscUtils::getLastWordAfterDot).sorted().collect(Collectors.toList()));
     }
 
     private void initVelocity() {
