@@ -13,7 +13,7 @@ FROM letter WHERE
  sender_name = :sender
  AND letter.date_send  between :start_date and :end_date
 ```
-###2. Add type suffixes to sql request and response parameters
+### 2. Add type suffixes to sql request and response parameters
 ```dbn-sql
 SELECT
      letter.date_send       send_date__d,
@@ -25,7 +25,7 @@ FROM letter WHERE
 Velocity markup can be used to create dynamic SQL queries, in this example `start_date` condition will be applied only if not null value is passed 
 as `start_date` parameter
 
-###3. Put prepared SQL to javadoc of @SqlSource annotated method 
+### 3. Put prepared SQL to javadoc of @SqlSource annotated method 
 
 ```java
 @SqlSourceFile
@@ -44,7 +44,7 @@ public interface LetterSample {
 }
 ```
 
-###4. Compile project - get query Request and Response parameters as Java objects and Repository methods 
+### 4. Compile project - get query Request and Response parameters as Java objects and Repository methods 
 Add maven dependency:
 ``` 
 <dependency>
@@ -100,7 +100,4 @@ public class LetterSampleDao extends BaseDao   {
 }
 ```
 
-
-This is an early draft of concept proof, hope that someone might find it interesting and will help moving it towards production ready release :)
-
-See the tests and usage example in `plain-sql-sample` module.
+### 5. Tests and usage examples are available in `plain-sql-sample` module.
