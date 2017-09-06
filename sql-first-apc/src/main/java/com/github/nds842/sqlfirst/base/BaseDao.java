@@ -18,6 +18,7 @@ import java.util.Set;
 
 public class BaseDao {
 
+    //TODO add query executor factory
     private QueryExecutor queryExecutor = new DefaultNamedParamQueryExecutor();
 
     public void executeUpdate(String noParamQuery, Connection conn) {

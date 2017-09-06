@@ -13,7 +13,7 @@ FROM letter WHERE
  sender_name = :sender
  AND letter.date_send  between :start_date and :end_date
 ```
-### 2. Add type suffixes to sql request and response parameters
+### 2. Add type suffixes to sql input and output parameters
 ```dbn-sql
 SELECT
      letter.date_send       send_date__d,
@@ -84,10 +84,9 @@ public class FindSampleLetterReq extends com.github.nds842.sqlfirst.base.BaseDto
     public void setStartDate(java.util.Date startDate){
         map.put(START_DATE, startDate);
     }
- }
-
+}
 public class LetterSampleDao extends BaseDao   { 
-    //some lines skipped
+    //lines skipped
     public List<FindSampleLetterRes> findSampleLetter(FindSampleLetterReq req, Connection conn) {
         QueryResultTransformer<FindSampleLetterRes> tr = (rs, rsNames) -> {
             FindSampleLetterRes dto = new FindSampleLetterRes();

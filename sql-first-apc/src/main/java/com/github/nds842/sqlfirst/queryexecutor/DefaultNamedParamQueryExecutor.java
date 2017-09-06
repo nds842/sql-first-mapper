@@ -35,14 +35,13 @@ public class DefaultNamedParamQueryExecutor implements QueryExecutor {
 
     @Override
     public void executeUpdate(String query, Connection conn) {
-        QueryRunner qRunner = new QueryRunner();
+        QueryRunner qRunner = getQueryRunner();
         try {
             qRunner.update(conn, query);
         } catch (SQLException e) {
             throw new RTSQLException(e);
         }
     }
-
 
     @Override
     public <T extends BaseDto> void executeUpdate(String query, T req, Connection conn) {
@@ -51,7 +50,7 @@ public class DefaultNamedParamQueryExecutor implements QueryExecutor {
         Matcher matcher = QUERY_PARAM_PATTERN.matcher(queryWithNamedParameters);
         List<String> paramNameList = getReqParamNames(matcher);
         Object[] arr = getReqParamValues(queryParamMap, paramNameList);
-        QueryRunner qRunner = new QueryRunner();
+        QueryRunner qRunner = getQueryRunner();
         try {
             qRunner.update(conn, matcher.replaceAll("?"), arr);
         } catch (SQLException e) {
@@ -62,7 +61,7 @@ public class DefaultNamedParamQueryExecutor implements QueryExecutor {
     @Override
     public <T extends BaseDto> List<T> executeQuery(String query, QueryResultTransformer<T> transformer, Connection conn) {
         ResultSetHandler<List<T>> rsHandler = getListResultSetHandler(transformer);
-        QueryRunner qRunner = new QueryRunner();
+        QueryRunner qRunner = getQueryRunner();
         try {
             return qRunner.query(conn, query, rsHandler);
         } catch (SQLException e) {
@@ -90,7 +89,7 @@ public class DefaultNamedParamQueryExecutor implements QueryExecutor {
         Object[] arr = getReqParamValues(queryParamMap, paramNameList);
         ResultSetHandler<List<T>> rsHandler = getListResultSetHandler(transformer);
 
-        QueryRunner qRunner = new QueryRunner();
+        QueryRunner qRunner = getQueryRunner();
         try {
             return qRunner.query(conn, matcher.replaceAll("?"), rsHandler, arr);
         } catch (SQLException e) {

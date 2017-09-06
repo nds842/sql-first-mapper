@@ -1,5 +1,7 @@
-package com.github.nds842.sqlfirst.base;
+package com.github.nds842.sqlfirst.apc;
 
+import com.github.nds842.sqlfirst.base.MiscUtils;
+import com.github.nds842.sqlfirst.base.QueryDesc;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
@@ -119,7 +121,7 @@ public class DaoBuilder {
             context.put("hasDtoClasses", queryDescList.stream().anyMatch(queryDesc -> queryDesc.hasRequest() || queryDesc.hasRequest()));
             context.put("queryDescList", queryDescList);
             context.put("daoClassName", daoClassName);
-            String implementClassName = implementMap.get(className);
+            String implementClassName = implementMap.get(packageName + "." + className);
             if (StringUtils.isNotBlank(implementClassName)) {
                 processImplementsList(context, Collections.singleton(implementClassName));
             }

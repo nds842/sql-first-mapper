@@ -7,6 +7,7 @@ import ${classPackage}.dto.*;
 #end
 import java.util.List;
 import java.sql.Connection;
+import javax.annotation.Generated;
 
 import com.github.nds842.sqlfirst.queryexecutor.*;
 import $baseClassFullName;
@@ -14,9 +15,11 @@ import $baseClassFullName;
 import ${className};
 #end
 
-public class $daoClassName extends $baseClassSimpleName #if($implementsNameList)implements#end #foreach($className in $implementsNameList)
-${className}#if($foreach.hasNext), #end
-#end {
+@Generated(
+    value = "com.github.nds842.sqlfirst.apc.SqlDaoAnnotationProcessor"
+)
+public class $daoClassName extends $baseClassSimpleName#if($implementsNameList) implements #end#foreach($className in $implementsNameList)
+${className}#if($foreach.hasNext), #end#end {
 
     private static final String PACKAGE_NAME = "$classPackage";
 

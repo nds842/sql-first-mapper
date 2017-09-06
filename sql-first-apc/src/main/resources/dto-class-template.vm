@@ -3,12 +3,16 @@ package ${classPackage};
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
+import javax.annotation.Generated;
 
 #foreach($className in $implementsFullList)
 import ${className};
 #end
 
 $classJavadoc
+@Generated(
+    value = "com.github.nds842.sqlfirst.apc.SqlDaoAnnotationProcessor"
+)
 public class $dtoClassName extends $baseDtoClass#if($implementsNameList) implements #end#foreach($className in $implementsNameList)
 ${className}#if($foreach.hasNext), #end
 #end {

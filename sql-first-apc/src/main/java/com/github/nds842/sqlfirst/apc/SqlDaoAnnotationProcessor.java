@@ -1,6 +1,5 @@
 package com.github.nds842.sqlfirst.apc;
 
-import com.github.nds842.sqlfirst.base.DaoBuilder;
 import com.github.nds842.sqlfirst.base.MiscUtils;
 import com.github.nds842.sqlfirst.base.QueryDesc;
 import com.github.nds842.sqlfirst.parser.SuffixParser;
@@ -75,7 +74,7 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
             if (!ann.implement()) {
                 continue;
             }
-            String key = element.getEnclosingElement().getSimpleName().toString() + "." + element.getSimpleName().toString();
+            String key = elementUtils.getPackageOf(element).getQualifiedName().toString() + "." + element.getSimpleName().toString();
             implementMap.put(key, element.asType().toString());
         }
         return implementMap;
@@ -98,14 +97,14 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
             SqlSource ann = element.getAnnotation(SqlSource.class);
 
             String sqlAsString;
-            switch (ann.getSQLSourceType()) {
+            switch (ann.sqlSourceType()) {
                 case FILE:
                     try {
-                        FileObject resource = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", ann.getSQLSourceFile());
+                        FileObject resource = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", ann.sqlSourceFile());
                         InputStream inputStream = resource.openInputStream();
                         sqlAsString = IOUtils.toString(inputStream, MiscUtils.UTF_8);
                     } catch (IOException e) {
-                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Can not find file: " + ann.getSQLSourceFile(), element);
+                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Can not find file: " + ann.sqlSourceFile(), element);
                         continue;
                     }
                     break;
@@ -113,7 +112,7 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
                     sqlAsString = elementUtils.getDocComment(element);
                     break;
                 default:
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Not supported source: " + ann.getSQLSourceType(), element);
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Not supported source: " + ann.sqlSourceType(), element);
                     continue;
             }
 
