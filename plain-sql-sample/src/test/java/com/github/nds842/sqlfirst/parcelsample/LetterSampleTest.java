@@ -35,7 +35,7 @@ public class LetterSampleTest {
     private void beforeTest() throws Exception {
         Class.forName("org.h2.Driver");
         conn = DriverManager.getConnection("jdbc:h2:mem:~/test", "sa", "");
-        InitDbSampleDao.getIntance().createTables(conn);
+        InitDbSampleDao.getInstance().createTables(conn);
     }
 
     @AfterTest
@@ -46,7 +46,7 @@ public class LetterSampleTest {
 
     @Test
     public void testLetter() throws SQLException {
-        LetterSampleDao dao = LetterSampleDao.getIntance();
+        LetterSampleDao dao = LetterSampleDao.getInstance();
 
         dao.deleteSampleLetter(conn);
 
@@ -65,9 +65,9 @@ public class LetterSampleTest {
 
     @Test
     public void testParcel() throws SQLException {
-        ParcelSampleDao dao = ParcelSampleDao.getIntance();
+        ParcelSampleDao dao = ParcelSampleDao.getInstance();
 
-        LetterSampleDao.getIntance().deleteSampleLetter(conn);
+        LetterSampleDao.getInstance().deleteSampleLetter(conn);
 
         InsertSampleParcelReq insertReq = new InsertSampleParcelReq();
         insertReq.withSenderName(SOMENAME).withWidth(WIDTH).withHeight(HEIGHT).withWeight(WEIGHT).withSendDate(new Date());

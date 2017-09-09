@@ -1,0 +1,34 @@
+package $classPackage;
+
+import com.github.nds842.sqlfirst.base.QueryExecutor;
+
+#if($hasDtoClasses)
+import ${classPackage}.dto.*;
+#end
+import java.util.List;
+import java.sql.Connection;
+import javax.annotation.Generated;
+import org.testng.annotations.Test;
+
+import ${baseClassFullName}Test;
+
+@Generated(
+    value = "com.github.nds842.sqlfirst.apc.SqlDaoAnnotationProcessor"
+)
+public class ${daoClassName}Test extends ${baseClassSimpleName}Test {
+
+
+#foreach ($method in $queryDescList)
+    @Test
+    public void ${method.methodName}() {
+#if(${method.isTestDisabled()})
+        if(true) { return; } //this test is skipped
+#end
+#if(${method.hasRequest()})
+        ${method.requestClass()} req = new ${method.requestClass()}();
+        fillRequest(req);
+#end
+        ${daoClassName}.getInstance().${method.methodName}(#if(${method.hasRequest()})req,#end getConnection());
+    }
+
+#end}

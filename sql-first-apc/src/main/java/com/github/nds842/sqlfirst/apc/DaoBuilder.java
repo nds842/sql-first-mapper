@@ -115,12 +115,12 @@ public class DaoBuilder {
         VelocityContext context = new VelocityContext();
         String className = firstElement.getClassName();
         String packageName = firstElement.getPackageName();
-        String daoClassName = className + "Dao";
+        String daoClassSimpleName = className + "Dao";
 
         try {
             context.put("hasDtoClasses", queryDescList.stream().anyMatch(queryDesc -> queryDesc.hasRequest() || queryDesc.hasRequest()));
             context.put("queryDescList", queryDescList);
-            context.put("daoClassName", daoClassName);
+            context.put("daoClassName", daoClassSimpleName);
             String implementClassName = implementMap.get(packageName + "." + className);
             if (StringUtils.isNotBlank(implementClassName)) {
                 processImplementsList(context, Collections.singleton(implementClassName));
@@ -129,10 +129,14 @@ public class DaoBuilder {
             context.put("baseClassFullName", baseDaoClassName);
             context.put("baseClassSimpleName", MiscUtils.getLastWordAfterDot(baseDaoClassName));
 
-            JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(packageName + "." + daoClassName);
-
-            try (PrintWriter writer = new PrintWriter(builderFile.openWriter())) {
+            String daoClassName = packageName + "." + daoClassSimpleName;
+            try (PrintWriter writer = new PrintWriter(processingEnv.getFiler().createSourceFile(daoClassName).openWriter())) {
                 Template template = Velocity.getTemplate("dao-class-template.vm", MiscUtils.UTF_8);
+                template.merge(context, writer);
+            }
+
+            try (PrintWriter writer = new PrintWriter(processingEnv.getFiler().createSourceFile(daoClassName + "Test").openWriter())) {
+                Template template = Velocity.getTemplate("dao-test-template.vm", MiscUtils.UTF_8);
                 template.merge(context, writer);
             }
         } catch (Exception ex) {
