@@ -1,13 +1,16 @@
-# SqlFirstMapper: the inverse approach - make SQL write your java code!
+Very often when the project needs to achieve better performance or you have to deal with complex dynamic SQL queries - the only way is to move from JPA and Spring Data to native SQL.
+Dealing with plenty of native SQL in a project can become a painful experience due to lack of type safety and weak relationship between SQL and Java. Sounds familiar?  Then take a look here: 
 
-Use @SqlSource annotation to generate java classes from plain SQL.
+# SqlFirstMapper: the inverse approach - make SQL write your Java code!
+
+Use @SqlSource annotation to generate Java classes from plain SQL.
  
 You can even place your SQL to Javadoc. One little thing to do is to add type defining suffixes to parameters and result fields of SQL query.     
 
 ### 1. Write sql
 ```dbn-sql
 SELECT
-    letter.date_send       send_date
+    letter.date_send       send_date,
     letter.sender_name     sender_name
 FROM letter WHERE
  sender_name = :sender
