@@ -16,28 +16,31 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Parent of generated Dao classes
+ */
 public class BaseDao {
 
     //TODO add query executor factory
     private QueryExecutor queryExecutor = new DefaultNamedParamQueryExecutor();
 
-    public void executeUpdate(String noParamQuery, Connection conn) {
+    protected void executeUpdate(String noParamQuery, Connection conn) {
         queryExecutor.executeUpdate(noParamQuery, conn);
     }
 
-    public <T extends BaseDto> void executeUpdate(String reqQuery, T req, Connection conn) {
+    protected <T extends BaseDto> void executeUpdate(String reqQuery, T req, Connection conn) {
         queryExecutor.executeUpdate(reqQuery, req, conn);
     }
 
-    public <T extends BaseDto> List<T> executeQuery(Connection conn, String resQuery, QueryResultTransformer<T> transformer) {
+    protected <T extends BaseDto> List<T> executeQuery(Connection conn, String resQuery, QueryResultTransformer<T> transformer) {
         return queryExecutor.executeQuery(resQuery, transformer, conn);
     }
 
-    public <T extends BaseDto, V extends BaseDto> List<T> executeQuery(String reqResQuery, V req, QueryResultTransformer<T> transformer, Connection conn) {
+    protected <T extends BaseDto, V extends BaseDto> List<T> executeQuery(String reqResQuery, V req, QueryResultTransformer<T> transformer, Connection conn) {
         return queryExecutor.executeQuery(reqResQuery, req, transformer, conn);
     }
 
-    public String getTemplate(String packageName, String queryName) {
+    protected String getTemplate(String packageName, String queryName) {
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(packageName.replace(".", "/") + "/sql/" + queryName + ".sql");
         try {
             return IOUtils.toString(inputStream);
@@ -71,7 +74,7 @@ public class BaseDao {
     }
 
 
-    public String getStringSafely(ResultSet rs, Set<String> rsNames, String columnName) {
+    protected String getStringSafely(ResultSet rs, Set<String> rsNames, String columnName) {
         if (!rsNames.contains(columnName.toUpperCase())) {
             return null;
         }

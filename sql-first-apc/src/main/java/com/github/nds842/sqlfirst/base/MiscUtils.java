@@ -5,6 +5,9 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class
+ */
 public class MiscUtils {
 
     public static final String UTF_8 = "utf-8";
@@ -12,6 +15,12 @@ public class MiscUtils {
     private MiscUtils() {
     }
 
+    /**
+     * Prepare camelcase name
+     *
+     * @param nameString string to convert to camel case
+     * @return camelcase string
+     */
     public static String prepareNameString(String nameString) {
         nameString = underscores(nameString).replaceAll("\\W", "_").toLowerCase();
         nameString = Arrays.stream(nameString.split("_")).map(StringUtils::capitalize).collect(Collectors.joining());
@@ -19,6 +28,12 @@ public class MiscUtils {
         return nameString;
     }
 
+    /**
+     * Transform input string to underscores, i.e. some.strIng will be converted to SOME_STR_ING
+     *
+     * @param input string to convert
+     * @return underscores string
+     */
     public static String underscores(String input) {
         input = input.replace(".", "_");
         if (input.toUpperCase().equals(input)) {
@@ -39,10 +54,17 @@ public class MiscUtils {
             }
             result.append(charAt);
         }
-        return result.toString().toUpperCase();
+        return result.toString().replace("__", "_").toUpperCase();
     }
 
 
+    /**
+     * Create Javadoc from input string
+     *
+     * @param query   string to create javadoc from
+     * @param padding number of space symbols to pad from the left
+     * @return prepared javadoc string
+     */
     public static String prepareJavadoc(String query, int padding) {
         String pad = StringUtils.rightPad("", padding);
         StringBuilder sb = new StringBuilder(pad + "/**" + "\n");
@@ -56,11 +78,13 @@ public class MiscUtils {
 
     }
 
-    public static String getLastWordAfterDot(String x) {
-        return x.contains(".") ? StringUtils.substringAfterLast(x, ".") : x;
-    }
-
-    public static String escape(String query) {
-        return "\"" + query.replace("\"", "\\\"").replace("\n","\"+\n        \" ") + "\"";
+    /**
+     * Split by dot and get last word
+     *
+     * @param stringWithDots string to get last word from
+     * @return word after last dot
+     */
+    public static String getLastWordAfterDot(String stringWithDots) {
+        return stringWithDots.contains(".") ? StringUtils.substringAfterLast(stringWithDots, ".") : stringWithDots;
     }
 }

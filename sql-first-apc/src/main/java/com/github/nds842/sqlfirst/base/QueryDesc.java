@@ -96,10 +96,6 @@ public class QueryDesc {
         return MiscUtils.underscores(getMethodName());
     }
 
-    public String getQueryEscaped() {
-        return MiscUtils.escape(query);
-    }
-
     public String getQueryName() {
         return queryName;
     }

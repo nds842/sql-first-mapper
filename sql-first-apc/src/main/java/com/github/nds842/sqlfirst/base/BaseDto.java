@@ -2,6 +2,9 @@ package com.github.nds842.sqlfirst.base;
 
 import java.util.Map;
 
+/**
+ * Parent of all generated Dto classes
+ */
 public abstract class BaseDto {
 
     @SuppressWarnings("unchecked")
