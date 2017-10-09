@@ -49,11 +49,11 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
         Map<String, String> daoImplementMap = prepareDaoClassImplementMap(roundEnv);
         List<QueryDesc> queryDescList = processSqlSource(roundEnv);
 
-        DaoBuilder daoBuilder = new DaoBuilder(processingEnv);
+        DaoWriter daoWriter = new DaoWriter(processingEnv);
         //TODO move to settings
         String baseDaoClassName = "com.github.nds842.sqlfirst.base.BaseDao";
         String baseDtoClassName = "com.github.nds842.sqlfirst.base.BaseDto";
-        daoBuilder.build(queryDescList, baseDaoClassName, baseDtoClassName, daoImplementMap);
+        daoWriter.write(queryDescList, baseDaoClassName, baseDtoClassName, daoImplementMap);
 
         return !queryDescList.isEmpty();
     }

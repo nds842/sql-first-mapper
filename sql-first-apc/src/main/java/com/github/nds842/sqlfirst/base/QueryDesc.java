@@ -10,15 +10,45 @@ import java.util.List;
  * SQL query description
  */
 public class QueryDesc {
-
+    
+    /**
+     * Query template
+     */
     private String query;
+    
+    /**
+     * Name of query and the name of method annotated with @SqlSource annotation
+     */
     private String queryName;
+    
+    /**
+     * Name of class containing method with SqlSource annotation for this query
+     */
     private String className;
+    
+    /**
+     * Name of package containing class with SqlSource annotation
+     */
     private String packageName;
-
+    
+    /**
+     * List of query request parameters
+     */
     private List<ParamDesc> responseParamList;
+
+    /**
+     * List of query response parameters
+     */
     private List<ParamDesc> requestParamList;
+    
+    /**
+     * List of interface names that request Dto class should implement
+     */
     private List<String> reqImplementsList = new ArrayList<>();
+    
+    /**
+     * List of interface names that response Dto class should implement
+     */
     private List<String> resImplementsList = new ArrayList<>();
 
     public void setResponseParamList(List<ParamDesc> responseParamList) {

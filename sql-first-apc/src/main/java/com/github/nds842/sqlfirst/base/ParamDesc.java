@@ -3,27 +3,36 @@ package com.github.nds842.sqlfirst.base;
 
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * ParamDesc contains description of sql query parameter either request or response
+ */
 public class ParamDesc implements Comparable<ParamDesc> {
-
+    
+    /**
+     * Index of parameter in query
+     */
     private final int index;
-    private Class<?> columnType;
-    private String columnTypeName;
-    private String realName;
-    private String name;
-    private String nameFirstUpper;
-    private String nameUnderscores;
-
-    public ParamDesc(int index, Class<?> columnType, String name) {
-        this(index, columnType, name, name);
-    }
-
+    
+    /**
+     * Type of column
+     */
+    private final Class<?> columnType;
+    
+    /**
+     * Real name of column
+     */
+    private final String realName;
+    
+    /**
+     * Normalized name of column
+     */
+    private final String name;
 
     public ParamDesc(int index, Class<?> columnType, String name, String realName) {
         this.columnType = columnType;
-        this.columnTypeName = columnType.getName();
         this.index = index;
         this.realName = realName;
-        this.setName(name);
+        this.name = MiscUtils.prepareNameString(name);
     }
 
     public int getIndex() {
@@ -33,17 +42,9 @@ public class ParamDesc implements Comparable<ParamDesc> {
     public Class<?> getColumnType() {
         return columnType;
     }
-
-    public void setColumnType(Class<?> columnType) {
-        this.columnType = columnType;
-    }
-
+    
     public String getColumnTypeName() {
-        return columnTypeName;
-    }
-
-    public void setColumnTypeName(String columnTypeName) {
-        this.columnTypeName = columnTypeName;
+        return columnType.getName();
     }
 
     public String getName() {
@@ -51,27 +52,15 @@ public class ParamDesc implements Comparable<ParamDesc> {
     }
 
     public String getNameFirstUpper() {
-        return nameFirstUpper;
+        return StringUtils.capitalize(this.name);
     }
 
     public String getNameUnderscores() {
-        return nameUnderscores;
+        return MiscUtils.underscores(this.name);
     }
-
 
     public String getRealName() {
         return realName;
-    }
-
-    @Override
-    public String toString() {
-        return "[" + columnType.getSimpleName() + (realName == null ? "" : ", " + realName) + (name == null ? "" : ", " + name) + "]";
-    }
-
-    public void setName(String name) {
-        this.name = MiscUtils.prepareNameString(name);
-        this.nameFirstUpper = StringUtils.capitalize(this.name);
-        this.nameUnderscores = MiscUtils.underscores(this.name);
     }
 
     @Override
@@ -94,7 +83,12 @@ public class ParamDesc implements Comparable<ParamDesc> {
         return paramDesc.getName().compareTo(paramDesc.getName());
     }
 
-    public String simpleTypeName() {
+    public String getSimpleTypeName() {
         return columnType.getSimpleName();
+    }
+    
+    @Override
+    public String toString() {
+        return "[" + columnType.getSimpleName() + (realName == null ? "" : ", " + realName) + (name == null ? "" : ", " + name) + "]";
     }
 }

@@ -25,16 +25,22 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DaoBuilder {
-
+/**
+ * Builder class for Dao classes - writes
+ */
+public class DaoWriter {
+    
+    /**
+     * Reference to ProcessingEnvironment to write files and report errors
+     */
     private final ProcessingEnvironment processingEnv;
-
-    public DaoBuilder(ProcessingEnvironment processingEnv) {
+    
+    public DaoWriter(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
         initVelocity();
     }
 
-    public void build(
+    public void write(
             List<QueryDesc> queryDescList,
             String baseDaoClassName,
             String baseDtoClassName,
@@ -49,15 +55,19 @@ public class DaoBuilder {
         groupsByClass.forEach(x -> {
             createDaoClass(x, baseDaoClassName, implementMap);
             for (QueryDesc queryDesc : x) {
-                createDtoClass(queryDesc, true, baseDtoClassName);
-                createDtoClass(queryDesc, false, baseDtoClassName);
-                createResource(queryDesc);
+                writeDtoClass(queryDesc, true, baseDtoClassName);
+                writeDtoClass(queryDesc, false, baseDtoClassName);
+                writeResource(queryDesc);
             }
         });
-        //TODO tests + schema check (data types, query joins vs FKs real or guessed)
     }
-
-    private void createResource(QueryDesc queryDesc) {
+    
+    /**
+     * Write <query>.sql to resources folder
+     *
+     * @param queryDesc information on query
+     */
+    private void writeResource(QueryDesc queryDesc) {
         Filer filer = processingEnv.getFiler();
         try {
             FileObject o = filer.createResource(StandardLocation.CLASS_OUTPUT,
@@ -70,8 +80,15 @@ public class DaoBuilder {
             throw new RuntimeException(e);
         }
     }
-
-    private void createDtoClass(
+    
+    /**
+     * Write Dto class to disk
+     *
+     * @param queryDesc description of query
+     * @param isReq write request (true) or response (false)
+     * @param baseDtoClassName name of parent dto class
+     */
+    private void writeDtoClass(
             QueryDesc queryDesc,
             boolean isReq,
             String baseDtoClassName

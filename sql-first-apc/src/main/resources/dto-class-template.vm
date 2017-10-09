@@ -18,22 +18,22 @@ ${className}#if($foreach.hasNext), #end
 #end {
 
 #foreach ($field in $fields)
-    public static final String $field.nameUnderscores = "$field.realName";
+    public static final String ${field.getNameUnderscores()} = "${field.getRealName()}";
 #end
 
     private Map<String, Object> map = new HashMap<>();
 
 #foreach ($field in $fields)
-    public $field.columnTypeName get${field.nameFirstUpper}(){
-        return getValue(map, $field.nameUnderscores);
+    public ${field.getColumnTypeName()} get${field.getNameFirstUpper()}(){
+        return getValue(map, ${field.getNameUnderscores()});
     }
 
-    public void set${field.nameFirstUpper}($field.columnTypeName $field.name){
-         map.put($field.nameUnderscores, $field.name);
+    public void set${field.getNameFirstUpper()}(${field.getColumnTypeName()} ${field.getName()}){
+         map.put(${field.getNameUnderscores()}, ${field.getName()});
     }
 
-    public $dtoClassName with${field.nameFirstUpper}($field.columnTypeName $field.name){
-         map.put($field.nameUnderscores, $field.name);
+    public $dtoClassName with${field.getNameFirstUpper()}(${field.getColumnTypeName()} ${field.getName()}){
+         map.put(${field.getNameUnderscores()}, ${field.getName()});
          return this;
     }
 

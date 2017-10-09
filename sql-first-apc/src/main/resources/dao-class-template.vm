@@ -36,7 +36,7 @@ ${className}#if($foreach.hasNext), #end#end {
         QueryResultTransformer<${method.responseClass()}> tr = (rs, rsNames) -> {
             ${method.responseClass()} dto = new ${method.responseClass()}();
 #foreach ($field in $method.responseParamList)
-            dto.set${field.nameFirstUpper}(get${field.simpleTypeName()}Safely(rs, rsNames, ${method.responseClass()}.$field.nameUnderscores));
+            dto.set${field.getNameFirstUpper()}(get${field.getSimpleTypeName()}Safely(rs, rsNames, ${method.responseClass()}.$field.getNameUnderscores()));
 #end
             return dto;
         };

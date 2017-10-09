@@ -29,6 +29,9 @@ public @interface SqlSource {
      * Source of raw SQL text
      */
     SQLSourceType sqlSourceType() default SQLSourceType.JAVADOC;
-
+    
+    /**
+     * @return name of file containing SQL for sqlSourceType == FILE
+     */
     String sqlSourceFile() default StringUtils.EMPTY;
 }
