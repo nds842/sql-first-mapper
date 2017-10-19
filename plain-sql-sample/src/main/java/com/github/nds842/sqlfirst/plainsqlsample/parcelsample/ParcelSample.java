@@ -1,12 +1,12 @@
-package com.github.nds842.sqlfirst.parcelsample;
+package com.github.nds842.sqlfirst.plainsqlsample.parcelsample;
 
 
 import com.github.nds842.sqlfirst.apc.SqlSource;
 import com.github.nds842.sqlfirst.apc.SqlSourceFile;
-import com.github.nds842.sqlfirst.interfaces.SenderNameItem;
-import com.github.nds842.sqlfirst.parcelsample.dto.FindSampleParcelReq;
-import com.github.nds842.sqlfirst.parcelsample.dto.FindSampleParcelRes;
-import com.github.nds842.sqlfirst.parcelsample.dto.InsertSampleParcelReq;
+import com.github.nds842.sqlfirst.plainsqlsample.interfaces.SenderNameItem;
+import com.github.nds842.sqlfirst.plainsqlsample.parcelsample.dto.FindSampleParcelReq;
+import com.github.nds842.sqlfirst.plainsqlsample.parcelsample.dto.FindSampleParcelRes;
+import com.github.nds842.sqlfirst.plainsqlsample.parcelsample.dto.InsertSampleParcelReq;
 
 import java.sql.Connection;
 import java.util.List;

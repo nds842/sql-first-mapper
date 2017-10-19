@@ -1,5 +1,6 @@
 package com.github.nds842.sqlfirst.apc;
 
+import com.github.nds842.sqlfirst.base.DaoDesc;
 import com.github.nds842.sqlfirst.base.MiscUtils;
 import com.github.nds842.sqlfirst.base.QueryDesc;
 import org.apache.commons.collections.CollectionUtils;
@@ -16,11 +17,9 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,20 +40,13 @@ public class DaoWriter {
     }
 
     public void write(
-            List<QueryDesc> queryDescList,
+            List<DaoDesc> daoDescList,
             String baseDaoClassName,
-            String baseDtoClassName,
-            Map<String, String> implementMap) {
-
-        Collection<List<QueryDesc>> groupsByClass = queryDescList.stream().collect(
-                Collectors.groupingBy(
-                        qDesc -> qDesc.getPackageName() + "." + qDesc.getClassName(),
-                        Collectors.mapping(qDesc -> qDesc, Collectors.toList()))
-        ).values();
-
-        groupsByClass.forEach(x -> {
-            createDaoClass(x, baseDaoClassName, implementMap);
-            for (QueryDesc queryDesc : x) {
+            String baseDtoClassName
+    ) {
+        daoDescList.forEach(x -> {
+            createDaoClass(x, baseDaoClassName);
+            for (QueryDesc queryDesc : x.getQueryDescList()) {
                 writeDtoClass(queryDesc, true, baseDtoClassName);
                 writeDtoClass(queryDesc, false, baseDtoClassName);
                 writeResource(queryDesc);
@@ -125,8 +117,9 @@ public class DaoWriter {
             throw new RuntimeException(ex);
         }
     }
-
-    private void createDaoClass(List<QueryDesc> queryDescList, String baseDaoClassName, Map<String, String> implementMap) {
+    
+    private void createDaoClass(DaoDesc daoDesc, String baseDaoClassName) {
+        List<QueryDesc> queryDescList = daoDesc.getQueryDescList();
         QueryDesc firstElement = queryDescList.iterator().next();
 
         VelocityContext context = new VelocityContext();
@@ -138,7 +131,7 @@ public class DaoWriter {
             context.put("hasDtoClasses", queryDescList.stream().anyMatch(queryDesc -> queryDesc.hasRequest() || queryDesc.hasRequest()));
             context.put("queryDescList", queryDescList);
             context.put("daoClassName", daoClassName);
-            String implementClassName = implementMap.get(packageName + "." + className);
+            String implementClassName = daoDesc.getImplementClassName();//implementMap.get(packageName + "." + className);
             if (StringUtils.isNotBlank(implementClassName)) {
                 processImplementsList(context, Collections.singleton(implementClassName));
             }
@@ -146,10 +139,26 @@ public class DaoWriter {
             context.put("baseClassFullName", baseDaoClassName);
             context.put("baseClassSimpleName", MiscUtils.getLastWordAfterDot(baseDaoClassName));
 
+            String templateFileName;
+            switch (daoDesc.getDaoType()) {
+                case PLAIN_SQL:
+                    templateFileName = "dao-class-plain-template.vm";
+                    break;
+                case SPRING_REPOSITORY:
+                    templateFileName = "dao-class-spring-template.vm";
+                    if (daoClassName.endsWith("CustomDao")){
+                        daoClassName = StringUtils.substring(daoClassName, 0, -9) + "Impl";
+                        context.put("daoClassName", daoClassName);
+                    }
+                    break;
+                default:
+                    throw new RuntimeException("Not supported DaoType " + daoDesc.getDaoType());
+            }
+            
             JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(packageName + "." + daoClassName);
-
+            
             try (PrintWriter writer = new PrintWriter(builderFile.openWriter())) {
-                Template template = Velocity.getTemplate("dao-class-template.vm", MiscUtils.UTF_8);
+                Template template = Velocity.getTemplate(templateFileName, MiscUtils.UTF_8);
                 template.merge(context, writer);
             }
         } catch (Exception ex) {

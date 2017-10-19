@@ -1,14 +1,10 @@
 package com.github.nds842.sqlfirst.queryexecutor;
 
 import com.github.nds842.sqlfirst.base.BaseDto;
-import com.github.nds842.sqlfirst.base.MiscUtils;
 import com.github.nds842.sqlfirst.base.QueryExecutor;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -27,12 +23,6 @@ public class DefaultNamedParamQueryExecutor implements QueryExecutor {
 
     private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("(?!\\B'[^']*)(:\\w+)(?![^']*'\\B)");
 
-    private VelocityEngine velocityEngine;
-
-    public DefaultNamedParamQueryExecutor() {
-        initVelocity();
-    }
-
     @Override
     public void executeUpdate(String query, Connection conn) {
         QueryRunner qRunner = getQueryRunner();
@@ -46,8 +36,7 @@ public class DefaultNamedParamQueryExecutor implements QueryExecutor {
     @Override
     public <T extends BaseDto> void executeUpdate(String query, T req, Connection conn) {
         Map<String, Object> queryParamMap = req == null ? Collections.emptyMap() : req.toMap();
-        String queryWithNamedParameters = prepareQueryWithNamedParameters(query, queryParamMap);
-        Matcher matcher = QUERY_PARAM_PATTERN.matcher(queryWithNamedParameters);
+        Matcher matcher = QUERY_PARAM_PATTERN.matcher(query);
         List<String> paramNameList = getReqParamNames(matcher);
         Object[] arr = getReqParamValues(queryParamMap, paramNameList);
         QueryRunner qRunner = getQueryRunner();
@@ -81,10 +70,9 @@ public class DefaultNamedParamQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    public <T extends BaseDto, V extends BaseDto> List<T> executeQuery(String queryName, V req, QueryResultTransformer<T> transformer, Connection conn) {
+    public <T extends BaseDto, V extends BaseDto> List<T> executeQuery(String query, V req, QueryResultTransformer<T> transformer, Connection conn) {
         Map<String, Object> queryParamMap = req == null ? Collections.emptyMap() : req.toMap();
-        String queryWithNamedParameters = prepareQueryWithNamedParameters(queryName, queryParamMap);
-        Matcher matcher = QUERY_PARAM_PATTERN.matcher(queryWithNamedParameters);
+        Matcher matcher = QUERY_PARAM_PATTERN.matcher(query);
         List<String> paramNameList = getReqParamNames(matcher);
         Object[] arr = getReqParamValues(queryParamMap, paramNameList);
         ResultSetHandler<List<T>> rsHandler = getListResultSetHandler(transformer);
@@ -121,25 +109,5 @@ public class DefaultNamedParamQueryExecutor implements QueryExecutor {
             paramNameList.add(matcher.group().substring(1));
         }
         return paramNameList;
-    }
-
-    private String prepareQueryWithNamedParameters(String query, Map<String, Object> queryParamMap) {
-        VelocityContext ctx = new VelocityContext();
-        queryParamMap.forEach(ctx::put);
-        StringWriter writer = new StringWriter();
-        velocityEngine.evaluate(ctx, writer, "prepareQueryWithNamedParameters", query);
-        return writer.toString();
-    }
-
-    private void initVelocity() {
-        velocityEngine = new VelocityEngine();
-        velocityEngine.setProperty("input.encoding", MiscUtils.UTF_8);
-        velocityEngine.setProperty("output.encoding", MiscUtils.UTF_8);
-
-        try {
-            velocityEngine.init();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
     }
 }

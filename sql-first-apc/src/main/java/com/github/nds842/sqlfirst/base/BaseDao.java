@@ -5,24 +5,54 @@ import com.github.nds842.sqlfirst.queryexecutor.DefaultNamedParamQueryExecutor;
 import com.github.nds842.sqlfirst.queryexecutor.QueryResultTransformer;
 import com.github.nds842.sqlfirst.queryexecutor.RTSQLException;
 import org.apache.commons.io.IOUtils;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Parent for generated Dao classes
  */
-public class BaseDao {
+public abstract class BaseDao {
 
     //TODO add query executor factory
     private QueryExecutor queryExecutor = new DefaultNamedParamQueryExecutor();
+    
+    
+    public BaseDao(){
+        initVelocity();
+    }
+    
+    private VelocityEngine velocityEngine;
+    
+    protected String prepareQueryWithNamedParameters(String query, Map<String, Object> queryParamMap) {
+        VelocityContext ctx = new VelocityContext();
+        queryParamMap.forEach(ctx::put);
+        StringWriter writer = new StringWriter();
+        velocityEngine.evaluate(ctx, writer, "prepareQueryWithNamedParameters", query);
+        return writer.toString();
+    }
+    
+    private void initVelocity() {
+        velocityEngine = new VelocityEngine();
+        velocityEngine.setProperty("input.encoding", MiscUtils.UTF_8);
+        velocityEngine.setProperty("output.encoding", MiscUtils.UTF_8);
+        
+        try {
+            velocityEngine.init();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
     
     /**
      * Execute query that has neither request nor response
@@ -43,7 +73,7 @@ public class BaseDao {
      * @param <V> type of request
      */
     protected <V extends BaseDto> void executeUpdate(String reqQuery, V req, Connection conn) {
-        queryExecutor.executeUpdate(reqQuery, req, conn);
+        queryExecutor.executeUpdate(prepareQueryWithNamedParameters(reqQuery, req.toMap()), req, conn);
     }
     
     /**
@@ -77,7 +107,7 @@ public class BaseDao {
             QueryResultTransformer<T> transformer,
             Connection conn
     ) {
-        return queryExecutor.executeQuery(reqResQuery, req, transformer, conn);
+        return queryExecutor.executeQuery(prepareQueryWithNamedParameters(reqResQuery, req.toMap()), req, transformer, conn);
     }
     
     /**
@@ -88,11 +118,12 @@ public class BaseDao {
      * @return string with velocity template file contents
      */
     protected String getTemplate(String packageName, String queryName) {
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(packageName.replace(".", "/") + "/sql/" + queryName + ".sql");
+        String resourceName = packageName.replace(".", "/") + "/sql/" + queryName + ".sql";
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(resourceName);
         try {
             return IOUtils.toString(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to find " + resourceName, e);
         }
     }
     

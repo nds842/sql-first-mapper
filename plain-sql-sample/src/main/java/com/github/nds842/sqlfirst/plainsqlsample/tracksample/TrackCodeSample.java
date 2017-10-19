@@ -1,12 +1,12 @@
-package com.github.nds842.sqlfirst.tracksample;
+package com.github.nds842.sqlfirst.plainsqlsample.tracksample;
 
 
 import com.github.nds842.sqlfirst.apc.SqlSource;
 import com.github.nds842.sqlfirst.apc.SqlSourceFile;
 import com.github.nds842.sqlfirst.base.SQLSourceType;
-import com.github.nds842.sqlfirst.tracksample.dto.CheckTrackCodeReq;
-import com.github.nds842.sqlfirst.tracksample.dto.CheckTrackCodeRes;
-import com.github.nds842.sqlfirst.tracksample.dto.InsertTrackCodeReq;
+import com.github.nds842.sqlfirst.plainsqlsample.tracksample.dto.CheckTrackCodeReq;
+import com.github.nds842.sqlfirst.plainsqlsample.tracksample.dto.CheckTrackCodeRes;
+import com.github.nds842.sqlfirst.plainsqlsample.tracksample.dto.InsertTrackCodeReq;
 
 import java.sql.Connection;
 import java.util.List;

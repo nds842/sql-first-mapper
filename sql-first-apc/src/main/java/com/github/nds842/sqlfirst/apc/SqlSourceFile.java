@@ -19,4 +19,7 @@ public @interface SqlSourceFile {
      * @return true if dao must implement this interface
      */
     boolean implement() default false;
+    
+    DaoType value() default DaoType.PLAIN_SQL;
+
 }

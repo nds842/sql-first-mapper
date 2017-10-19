@@ -1,4 +1,4 @@
-package com.github.nds842.sqlfirst.initdbsample;
+package com.github.nds842.sqlfirst.plainsqlsample.initdbsample;
 
 
 import com.github.nds842.sqlfirst.apc.SqlSource;

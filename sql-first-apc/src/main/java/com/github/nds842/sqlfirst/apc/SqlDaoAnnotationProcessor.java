@@ -1,5 +1,6 @@
 package com.github.nds842.sqlfirst.apc;
 
+import com.github.nds842.sqlfirst.base.DaoDesc;
 import com.github.nds842.sqlfirst.base.MiscUtils;
 import com.github.nds842.sqlfirst.base.QueryDesc;
 import com.github.nds842.sqlfirst.parser.SuffixParser;
@@ -26,10 +27,10 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Annotation processor for SqlSource and SqlSourceFile annotations
@@ -45,39 +46,43 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
         if (roundEnv.processingOver()) {
             return false;
         }
-
-        Map<String, String> daoImplementMap = prepareDaoClassImplementMap(roundEnv);
-        List<QueryDesc> queryDescList = processSqlSource(roundEnv);
+    
+        List<DaoDesc> daoDescList = processSqlSource(roundEnv);
+        prepareDaoClassImplementMap(daoDescList, roundEnv);
 
         DaoWriter daoWriter = new DaoWriter(processingEnv);
         //TODO move to settings
         String baseDaoClassName = "com.github.nds842.sqlfirst.base.BaseDao";
         String baseDtoClassName = "com.github.nds842.sqlfirst.base.BaseDto";
-        daoWriter.write(queryDescList, baseDaoClassName, baseDtoClassName, daoImplementMap);
+        daoWriter.write(daoDescList, baseDaoClassName, baseDtoClassName);
 
-        return !queryDescList.isEmpty();
+        return !daoDescList.isEmpty();
     }
 
     /**
      * Prepare Dao interfaces from {@link SqlSourceFile} annotation
      *
+     * @param daoDescList dao description
      * @param roundEnv annotation processor environment
-     * @return map dao class name vs name of interface
      */
-    private Map<String, String> prepareDaoClassImplementMap(RoundEnvironment roundEnv) {
-        Map<String, String> implementMap = new HashMap<>();
+    private void prepareDaoClassImplementMap(List<DaoDesc> daoDescList, RoundEnvironment roundEnv) {
+        Map<String, DaoDesc> daoDescMap = daoDescList.stream().collect(Collectors.toMap(DaoDesc::getSourceClassName, x -> x));
+     
         Elements elementUtils = processingEnv.getElementUtils();
 
         Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(SqlSourceFile.class);
         for (Element element : annotatedElements) {
             SqlSourceFile ann = element.getAnnotation(SqlSourceFile.class);
-            if (!ann.implement()) {
+            String key = elementUtils.getPackageOf(element).getQualifiedName().toString() + "." + element.getSimpleName().toString();
+            DaoDesc daoDesc = daoDescMap.get(key);
+            if (daoDesc == null){
                 continue;
             }
-            String key = elementUtils.getPackageOf(element).getQualifiedName().toString() + "." + element.getSimpleName().toString();
-            implementMap.put(key, element.asType().toString());
+            if (ann.implement() || ann.value() == DaoType.SPRING_REPOSITORY) {
+                daoDesc.setImplementClassName(element.asType().toString());
+            }
+            daoDesc.setDaoType(ann.value());
         }
-        return implementMap;
     }
 
     /**
@@ -86,7 +91,7 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
      * @param roundEnv annotation processor environment
      * @return list of query descriptions
      */
-    private List<QueryDesc> processSqlSource(RoundEnvironment roundEnv) {
+    private List<DaoDesc> processSqlSource(RoundEnvironment roundEnv) {
         List<QueryDesc> queryDescList = new ArrayList<>();
 
 
@@ -129,7 +134,19 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
             queryDescList.add(queryDesc);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "APC working on " + queryName, element);
         }
-        return queryDescList;
+    
+        return queryDescList.stream().collect(
+                Collectors.groupingBy(
+                        qDesc -> qDesc.getPackageName() + "." + qDesc.getClassName(),
+                        Collectors.mapping(qDesc -> qDesc, Collectors.toList()))
+        ).values().stream().map(x ->
+        {
+            DaoDesc daoDesc = new DaoDesc();
+            daoDesc.setQueryDescList(x);
+            QueryDesc qDesc = x.get(0);
+            daoDesc.setSourceClassName(qDesc.getPackageName() + "." + qDesc.getClassName());
+            return daoDesc;
+        }).collect(Collectors.toList());
     }
 
     /**
