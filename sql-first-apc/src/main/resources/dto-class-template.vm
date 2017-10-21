@@ -11,7 +11,7 @@ import ${className};
 
 $classJavadoc
 @Generated(
-    value = "com.github.nds842.sqlfirst.apc.SqlDaoAnnotationProcessor"
+    value = "com.github.nds842.sqlfirst.apc.SqlFirstAnnotationProcessor"
 )
 public class $dtoClassName extends $baseDtoClass#if($implementsNameList) implements #end#foreach($className in $implementsNameList)
 ${className}#if($foreach.hasNext), #end

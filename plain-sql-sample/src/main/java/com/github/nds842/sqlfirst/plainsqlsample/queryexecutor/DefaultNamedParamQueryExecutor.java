@@ -1,7 +1,7 @@
-package com.github.nds842.sqlfirst.queryexecutor;
+package com.github.nds842.sqlfirst.plainsqlsample.queryexecutor;
 
 import com.github.nds842.sqlfirst.base.BaseDto;
-import com.github.nds842.sqlfirst.base.QueryExecutor;
+import com.github.nds842.sqlfirst.queryexecutor.QueryResultTransformer;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 

@@ -41,9 +41,10 @@ public class DaoWriter {
 
     public void write(
             List<DaoDesc> daoDescList,
-            String baseDaoClassName,
-            String baseDtoClassName
+            SqlFirstApcConfig sqlFirstApcConfig
     ) {
+        String baseDtoClassName = sqlFirstApcConfig.baseDtoClassName();
+        String baseDaoClassName = sqlFirstApcConfig.baseDaoClassName();
         daoDescList.forEach(x -> {
             createDaoClass(x, baseDaoClassName);
             for (QueryDesc queryDesc : x.getQueryDescList()) {

@@ -36,10 +36,14 @@ import java.util.stream.Collectors;
  * Annotation processor for SqlSource and SqlSourceFile annotations
  */
 @SuppressWarnings("unused")
-@SupportedAnnotationTypes({"com.github.nds842.sqlfirst.apc.SqlSource", "com.github.nds842.sqlfirst.apc.SqlSourceFile"})
+@SupportedAnnotationTypes({
+        "com.github.nds842.sqlfirst.apc.SqlSource",
+        "com.github.nds842.sqlfirst.apc.SqlSourceFile",
+        "com.github.nds842.sqlfirst.apc.SqlFirstApcConfig"
+})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
-public class SqlDaoAnnotationProcessor extends AbstractProcessor {
+public class SqlFirstAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -47,15 +51,14 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
             return false;
         }
     
-        List<DaoDesc> daoDescList = processSqlSource(roundEnv);
+        SqlFirstApcConfig globalConfig = prepareGlobalConfig(roundEnv);
+        List<DaoDesc> daoDescList = processSqlSource(roundEnv, globalConfig);
         prepareDaoClassImplementMap(daoDescList, roundEnv);
-
-        DaoWriter daoWriter = new DaoWriter(processingEnv);
-        //TODO move to settings
-        String baseDaoClassName = "com.github.nds842.sqlfirst.base.BaseDao";
-        String baseDtoClassName = "com.github.nds842.sqlfirst.base.BaseDto";
-        daoWriter.write(daoDescList, baseDaoClassName, baseDtoClassName);
-
+    
+        if (globalConfig != null) {
+            DaoWriter daoWriter = new DaoWriter(processingEnv);
+            daoWriter.write(daoDescList, globalConfig);
+        }
         return !daoDescList.isEmpty();
     }
 
@@ -84,19 +87,46 @@ public class SqlDaoAnnotationProcessor extends AbstractProcessor {
             daoDesc.setDaoType(ann.value());
         }
     }
-
+    
+    
+    /**
+     * Prepare global config
+     *
+     * @param roundEnv annotation processor environment
+     */
+    private SqlFirstApcConfig prepareGlobalConfig(RoundEnvironment roundEnv) {
+        SqlFirstApcConfig sqlFirstApcConfig = null;
+        
+        Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(SqlFirstApcConfig.class);
+        for (Element element : annotatedElements) {
+            SqlFirstApcConfig ann = element.getAnnotation(SqlFirstApcConfig.class);
+            if (sqlFirstApcConfig == null) {
+                sqlFirstApcConfig = ann;
+            } else {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "SqlFirstApcConfig annotation must be declared only once ", element);
+            }
+        }
+        return sqlFirstApcConfig;
+        
+    }
+    
     /**
      * Method creates query descriptions from {@link SqlSource} annotated methods
      *
      * @param roundEnv annotation processor environment
      * @return list of query descriptions
      */
-    private List<DaoDesc> processSqlSource(RoundEnvironment roundEnv) {
+    private List<DaoDesc> processSqlSource(RoundEnvironment roundEnv, SqlFirstApcConfig globalConfig) {
         List<QueryDesc> queryDescList = new ArrayList<>();
 
 
         Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(SqlSource.class);
         for (Element element : annotatedElements) {
+            if (globalConfig == null) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "SqlFirstApcConfig annotation must be declared for module ", element);
+                continue;
+            }
+    
             Elements elementUtils = processingEnv.getElementUtils();
             String queryName = element.getSimpleName().toString();
             SqlSource ann = element.getAnnotation(SqlSource.class);

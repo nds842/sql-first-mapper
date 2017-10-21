@@ -1,10 +1,9 @@
 package com.github.nds842.sqlfirst;
 
 import com.github.nds842.sqlfirst.base.BaseDto;
-import com.github.nds842.sqlfirst.base.QueryExecutor;
-import com.github.nds842.sqlfirst.queryexecutor.DefaultNamedParamQueryExecutor;
+import com.github.nds842.sqlfirst.plainsqlsample.queryexecutor.DefaultNamedParamQueryExecutor;
+import com.github.nds842.sqlfirst.plainsqlsample.queryexecutor.QueryExecutor;
 import com.github.nds842.sqlfirst.queryexecutor.QueryResultTransformer;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.testng.Assert;
@@ -14,6 +13,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +29,10 @@ public class QueryExecutorTest {
         BaseDto testDto = new BaseDto() {
             @Override
             public Map<String, Object> toMap() {
-                return ImmutableMap.of("p1_val__i", 123, "p2_val__l", 456L);
+                Map<String, Object> map = new HashMap<>();
+                map.put("p1_val__i", 123);
+                map.put("p2_val__l", 456L);
+                return map;
             }
         };
         qr.executeUpdate("update sometable set p1=:p1_val__i, p2=:p2_val__l", testDto, null);

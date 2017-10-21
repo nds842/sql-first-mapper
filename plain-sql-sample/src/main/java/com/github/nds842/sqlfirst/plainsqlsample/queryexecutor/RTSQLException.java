@@ -1,4 +1,4 @@
-package com.github.nds842.sqlfirst.queryexecutor;
+package com.github.nds842.sqlfirst.plainsqlsample.queryexecutor;
 
 import java.sql.SQLException;
 
