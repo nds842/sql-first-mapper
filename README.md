@@ -3,36 +3,21 @@ Dealing with plenty of native SQL in a project can become a painful experience d
 
 # SqlFirstMapper: the inverse approach - make SQL write your Java code!
 
-Use @SqlSource annotation to generate Java classes from plain SQL.
- 
-You can even place your SQL to Javadoc. One little thing to do is to add type defining suffixes to parameters and result fields of SQL query.     
-
-### 1. Write sql
+Suppose you have to implement custom repository method using JdbcTemplate that will execute dynamic SQL, where the date parameter should be applied only if date is not null:
+  
 ```dbn-sql
 SELECT
     letter.date_send       send_date,
     letter.sender_name     sender_name
 FROM letter WHERE
  sender_name = :sender
- AND letter.date_send  between :start_date and :end_date
+ AND letter.date_send  > :start_date 
 ```
-### 2. Add type suffixes to sql input and output parameters
-```dbn-sql
-SELECT
-     letter.date_send       send_date__d,
-     letter.sender_name     sender_name__s
-FROM letter WHERE
-  sender_name = :sender__s
-  #if(${start_date__d})  AND letter.date_send  >  :start_date__d #end
-```
-Velocity markup can be used to create dynamic SQL queries, in this example `start_date` condition will be applied only if not null value is passed 
-as `start_date` parameter
-
-### 3. Put prepared SQL to javadoc of @SqlSource annotated method 
-
+ 
+Just declare custom repository interface and add `@SqlSource` annotation:
+ 
 ```java
-@SqlSourceFile
-public interface LetterSample {
+public interface LetterRepositoryCustom {
 
     /**
      * SELECT
@@ -47,59 +32,44 @@ public interface LetterSample {
 }
 ```
 
-### 4. Compile project - get query Request and Response parameters as Java objects and Repository methods 
-Add maven dependency:
-``` 
-<dependency>
-   <groupId>com.gitgub.nds842</groupId>
-   <artifactId>sql-first-apc</artifactId>
-   <version>1.0-SNAPSHOT</version>
-</dependency>
-```
-Compile and check that files are created in `target/generated-sources` folder:
+Attach `sql-first-apc` annotation processor to your build by just adding a processor jar dependency.  
+
+RepositoryImpl class with method request and response parameters will be automatically generated at compile time:  
+
 ```java
-public class FindSampleLetterRes extends com.github.nds842.sqlfirst.base.BaseDto {
-    //lines skipped
-    public java.util.Date getStartDate(){
-        return getValue(map, SEND_DATE);
-    }
-    public void setSendDate(java.util.Date sendDate){
-         map.put(SEND_DATE, sendDate);
-    }
-    public java.lang.String getSenderName(){
-        return getValue(map, SENDER_NAME);
-    }
-    public void setSenderName(java.lang.String senderName){
-         map.put(SENDER_NAME, senderName);
-    }
-}
-public class FindSampleLetterReq extends com.github.nds842.sqlfirst.base.BaseDto {
-    //lines skipped
-    public java.lang.String getSender(){
-       return getValue(map, SENDER);
-    }  
-    public void setSender(java.lang.String sender){
-        map.put(SENDER, sender);
-    }    
-    public java.util.Date getStartDate(){
-       return getValue(map, START_DATE);
-    }
-    public void setStartDate(java.util.Date startDate){
-        map.put(START_DATE, startDate);
-    }
-}
-public class LetterSampleDao extends BaseDao   { 
-    //lines skipped
-    public List<FindSampleLetterRes> findSampleLetter(FindSampleLetterReq req, Connection conn) {
-        QueryResultTransformer<FindSampleLetterRes> tr = (rs, rsNames) -> {
+@Generated(
+    value = "com.github.nds842.sqlfirst.apc.SqlFirstAnnotationProcessor"
+)
+@Repository
+public class LetterRepositoryImpl implements LetterRepositoryCustom {
+
+    @Autowired
+    private SqlFirstSpringQueryExecutor sqlFirstQueryExecutor;
+
+    /**
+     *   SELECT
+     *      letter.date_send       send_date__d,
+     *      letter.sender_name     sender_name__s
+     *   FROM letter WHERE
+     *     sender_name = :sender__s
+     *     #if(${start_date__d})  AND letter.date_send >= :start_date__d #end
+     */
+    public List<FindSampleLetterRes> findSampleLetter(FindSampleLetterReq req) {
+        RowMapper<FindSampleLetterRes> rowMapper = (resultSet, i) -> {
             FindSampleLetterRes dto = new FindSampleLetterRes();
-            dto.setSendDate(getDateSafely(rs, rsNames, FindSampleLetterRes.SEND_DATE));
-            dto.setSenderName(getStringSafely(rs, rsNames, FindSampleLetterRes.SENDER_NAME));
+            dto.setSendDate(resultSet.getDate(FindSampleLetterRes.SEND_DATE));
+            dto.setSenderName(resultSet.getString(FindSampleLetterRes.SENDER_NAME));
             return dto;
         };
-        return super.executeQuery(getTemplate(PACKAGE_NAME, "FindSampleLetter"), req, tr, conn);
+        return sqlFirstQueryExecutor.executeQuery(sqlFirstQueryExecutor.getTemplate(PACKAGE_NAME, "FindSampleLetter"), req, rowMapper);
     }
 }
 ```
 
-### 5. Tests and usage examples are available in `plain-sql-sample` module.
+Only correct your custom repository interface to conform with generated method signature:
+ 
+`List<FindSampleLetterRes> findSampleLetter(FindSampleLetterReq req);` 
+
+Sample usage examples are available in `spring-sample` module.
+
+Sql source can be supplied as reference to resource file, parent class of generated repository impl can be set up via annotation properties so as the name of generated class.   
