@@ -3,7 +3,7 @@ Dealing with plenty of native SQL in a project can become a painful experience d
 
 # SqlFirstMapper: the inverse approach - make SQL write your Java code!
 
-Suppose you have to implement custom repository method using JdbcTemplate that will execute dynamic SQL, where the date parameter should be applied only if date is not null:
+Suppose you have to implement custom repository method using JdbcTemplate that will execute dynamic SQL, where the date parameter should be applied only if it is not null:
   
 ```dbn-sql
 SELECT
@@ -11,7 +11,7 @@ SELECT
     letter.sender_name     sender_name
 FROM letter WHERE
  sender_name = :sender
- AND letter.date_send  > :start_date 
+ AND letter.date_send  >= :start_date 
 ```
  
 Just declare custom repository interface and add `@SqlSource` annotation:
@@ -25,7 +25,7 @@ public interface LetterRepositoryCustom {
      *      letter.sender_name     sender_name__s
      * FROM letter WHERE
      *   sender_name = :sender__s
-     *   #if(${start_date__d})  AND letter.date_send  > :start_date__d #end
+     *   #if(${start_date__d})  AND letter.date_send  >= :start_date__d #end
      */
     @SqlSource
     void findSampleLetter();
