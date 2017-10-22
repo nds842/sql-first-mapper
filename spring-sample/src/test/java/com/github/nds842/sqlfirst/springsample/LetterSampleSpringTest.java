@@ -1,22 +1,18 @@
 package com.github.nds842.sqlfirst.springsample;
 
 import com.github.nds842.sqlfirst.springsample.model.Letter;
-import com.github.nds842.sqlfirst.springsample.repository.FindSampleLetterReq;
-import com.github.nds842.sqlfirst.springsample.repository.FindSampleLetterRes;
 import com.github.nds842.sqlfirst.springsample.repository.LetterRepository;
-import org.junit.runner.RunWith;
+import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleLetterReq;
+import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleLetterRes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 import java.util.Date;
 import java.util.List;
 
-
-@RunWith(SpringRunner.class)
-@DataJpaTest
+@SpringBootTest
 public class LetterSampleSpringTest extends AbstractTransactionalTestNGSpringContextTests {
     
     @Autowired

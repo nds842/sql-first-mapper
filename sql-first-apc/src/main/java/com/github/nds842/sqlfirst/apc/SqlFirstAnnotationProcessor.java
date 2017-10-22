@@ -6,6 +6,7 @@ import com.github.nds842.sqlfirst.base.QueryDesc;
 import com.github.nds842.sqlfirst.parser.SuffixParser;
 import com.google.auto.service.AutoService;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Processor;
@@ -51,15 +52,23 @@ public class SqlFirstAnnotationProcessor extends AbstractProcessor {
             return false;
         }
     
-        SqlFirstApcConfig globalConfig = prepareGlobalConfig(roundEnv);
-        List<DaoDesc> daoDescList = processSqlSource(roundEnv, globalConfig);
-        prepareDaoClassImplementMap(daoDescList, roundEnv);
-    
-        if (globalConfig != null) {
-            DaoWriter daoWriter = new DaoWriter(processingEnv);
-            daoWriter.write(daoDescList, globalConfig);
+        try {
+            SqlFirstApcConfig globalConfig = prepareGlobalConfig(roundEnv);
+            List<DaoDesc> daoDescList = processSqlSource(roundEnv, globalConfig);
+            prepareDaoClassImplementMap(daoDescList, roundEnv);
+        
+            if (globalConfig != null) {
+                DaoWriter daoWriter = new DaoWriter(processingEnv);
+                daoWriter.write(daoDescList, globalConfig);
+            }
+            return !daoDescList.isEmpty();
+        
+        } catch (RuntimeException ex) {
+            roundEnv.getElementsAnnotatedWith(SqlFirstApcConfig.class).forEach(x ->
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, ExceptionUtils.getFullStackTrace(ex), x)
+            );
+            throw ex;
         }
-        return !daoDescList.isEmpty();
     }
 
     /**
@@ -81,10 +90,12 @@ public class SqlFirstAnnotationProcessor extends AbstractProcessor {
             if (daoDesc == null){
                 continue;
             }
-            if (ann.implement() || ann.value() == DaoType.SPRING_REPOSITORY) {
+            if (ann.implement()) {
                 daoDesc.setImplementClassName(element.asType().toString());
             }
             daoDesc.setDaoType(ann.value());
+            daoDesc.setTargetClassName(ann.targetClassName());
+            daoDesc.setBaseDaoClassName(ann.baseDaoClassName());
         }
     }
     
@@ -96,7 +107,8 @@ public class SqlFirstAnnotationProcessor extends AbstractProcessor {
      */
     private SqlFirstApcConfig prepareGlobalConfig(RoundEnvironment roundEnv) {
         SqlFirstApcConfig sqlFirstApcConfig = null;
-        
+    
+        //TODO read with filer for the case of partial compilation
         Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(SqlFirstApcConfig.class);
         for (Element element : annotatedElements) {
             SqlFirstApcConfig ann = element.getAnnotation(SqlFirstApcConfig.class);

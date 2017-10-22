@@ -85,6 +85,9 @@ public class MiscUtils {
      * @return word after last dot
      */
     public static String getLastWordAfterDot(String stringWithDots) {
+        if (StringUtils.isBlank(stringWithDots)){
+            return stringWithDots;
+        }
         return stringWithDots.contains(".") ? StringUtils.substringAfterLast(stringWithDots, ".") : stringWithDots;
     }
 }

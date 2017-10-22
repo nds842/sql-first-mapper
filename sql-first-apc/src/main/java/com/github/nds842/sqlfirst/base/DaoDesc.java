@@ -6,9 +6,11 @@ import com.github.nds842.sqlfirst.apc.DaoType;
 import java.util.List;
 
 public class DaoDesc {
-    List<QueryDesc> queryDescList;
+    private List<QueryDesc> queryDescList;
     private String implementClassName;
     private String sourceClassName;
+    private String targetClassName;
+    private String baseDaoClassName;
     private DaoType daoType;
     
     public List<QueryDesc> getQueryDescList() {
@@ -41,5 +43,21 @@ public class DaoDesc {
     
     public void setDaoType(DaoType daoType) {
         this.daoType = daoType;
+    }
+    
+    public String getBaseDaoClassName() {
+        return baseDaoClassName;
+    }
+    
+    public void setBaseDaoClassName(String baseDaoClassName) {
+        this.baseDaoClassName = baseDaoClassName;
+    }
+    
+    public String getTargetClassName() {
+        return targetClassName;
+    }
+    
+    public void setTargetClassName(String targetClassName) {
+        this.targetClassName = targetClassName;
     }
 }

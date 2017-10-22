@@ -13,6 +13,7 @@
     <modules>
         <module>sql-first-apc</module>
         <module>plain-sql-sample</module>
+        <module>spring-sample</module>
     </modules>
 
 

@@ -17,7 +17,6 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -44,9 +43,8 @@ public class DaoWriter {
             SqlFirstApcConfig sqlFirstApcConfig
     ) {
         String baseDtoClassName = sqlFirstApcConfig.baseDtoClassName();
-        String baseDaoClassName = sqlFirstApcConfig.baseDaoClassName();
         daoDescList.forEach(x -> {
-            createDaoClass(x, baseDaoClassName);
+            createDaoClass(x, sqlFirstApcConfig);
             for (QueryDesc queryDesc : x.getQueryDescList()) {
                 writeDtoClass(queryDesc, true, baseDtoClassName);
                 writeDtoClass(queryDesc, false, baseDtoClassName);
@@ -119,43 +117,65 @@ public class DaoWriter {
         }
     }
     
-    private void createDaoClass(DaoDesc daoDesc, String baseDaoClassName) {
+    private void createDaoClass(DaoDesc daoDesc, SqlFirstApcConfig sqlFirstApcConfig) {
+        String queryExecutorClassName = sqlFirstApcConfig.queryExecutorClassName();
+        
+        String baseDaoClassName = StringUtils.isBlank(daoDesc.getBaseDaoClassName()) ? sqlFirstApcConfig.baseDaoClassName() : daoDesc.getBaseDaoClassName();
+        
+        
+        
         List<QueryDesc> queryDescList = daoDesc.getQueryDescList();
         QueryDesc firstElement = queryDescList.iterator().next();
-
+        
         VelocityContext context = new VelocityContext();
         String className = firstElement.getClassName();
         String packageName = firstElement.getPackageName();
         String daoClassName = className + "Dao";
-
+        
+        
         try {
             context.put("hasDtoClasses", queryDescList.stream().anyMatch(queryDesc -> queryDesc.hasRequest() || queryDesc.hasRequest()));
             context.put("queryDescList", queryDescList);
-            context.put("daoClassName", daoClassName);
             String implementClassName = daoDesc.getImplementClassName();//implementMap.get(packageName + "." + className);
+            
+            Set<String> implementsSet = new HashSet<>();
             if (StringUtils.isNotBlank(implementClassName)) {
-                processImplementsList(context, Collections.singleton(implementClassName));
+                implementsSet.add(implementClassName);
             }
-            context.put("classPackage", packageName);
+            
             context.put("baseClassFullName", baseDaoClassName);
             context.put("baseClassSimpleName", MiscUtils.getLastWordAfterDot(baseDaoClassName));
+            
+            context.put("queryExecutorClassFullName", queryExecutorClassName);
+            context.put("queryExecutorClassName", MiscUtils.getLastWordAfterDot(queryExecutorClassName));
 
             String templateFileName;
-            switch (daoDesc.getDaoType()) {
+            DaoType daoType = daoDesc.getDaoType();
+            if (daoType == null || daoType == DaoType.USE_DEFAULT) {
+                daoType = sqlFirstApcConfig.daoType();
+            }
+            switch (daoType) {
                 case PLAIN_SQL:
                     templateFileName = "dao-class-plain-template.vm";
                     break;
                 case SPRING_REPOSITORY:
                     templateFileName = "dao-class-spring-template.vm";
-                    if (daoClassName.endsWith("CustomDao")){
+                    String targetClassName = daoDesc.getTargetClassName();
+                    if (StringUtils.isNotBlank(targetClassName)) {
+                        daoClassName = MiscUtils.getLastWordAfterDot(targetClassName);
+                        packageName = StringUtils.substring(targetClassName, 0, -daoClassName.length() - 1);
+                    } else if (daoClassName.endsWith("CustomDao")) {
                         daoClassName = StringUtils.substring(daoClassName, 0, -9) + "Impl";
-                        context.put("daoClassName", daoClassName);
                     }
+                    implementsSet.add(daoDesc.getSourceClassName());
                     break;
                 default:
-                    throw new RuntimeException("Not supported DaoType " + daoDesc.getDaoType());
+                    throw new RuntimeException("Not supported DaoType " + daoType);
             }
             
+            processImplementsList(context, implementsSet);
+            context.put("daoClassName", daoClassName);
+            context.put("classPackage", packageName);
             JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(packageName + "." + daoClassName);
             
             try (PrintWriter writer = new PrintWriter(builderFile.openWriter())) {

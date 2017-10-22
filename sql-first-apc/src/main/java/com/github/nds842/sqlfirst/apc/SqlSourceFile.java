@@ -20,6 +20,10 @@ public @interface SqlSourceFile {
      */
     boolean implement() default false;
     
-    DaoType value() default DaoType.PLAIN_SQL;
-
+    DaoType value() default DaoType.USE_DEFAULT;
+    
+    String targetClassName() default "";
+    
+    String baseDaoClassName() default "";
+    
 }

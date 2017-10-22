@@ -44,7 +44,7 @@ ${className}#if($foreach.hasNext), #end#end {
 #foreach ($method in $queryDescList)
 $method.methodJavadoc
     public #if(${method.hasResponse()})List<${method.responseClass()}>#{else}void#end ${method.methodName}(#if(${method.hasRequest()})${method.requestClass()} req,#end Connection conn) {
-#tr()
+#tr($method)
         #if(${method.hasResponse()})return super.executeQuery#{else}super.executeUpdate#{end}(getTemplate(PACKAGE_NAME, "${method.getMethodNameFirstUpper()}")#if(${method.hasRequest()}), req#{end}#if(${method.hasResponse()}), tr#end, conn);
     }
 

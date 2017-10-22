@@ -1,20 +1,22 @@
 package $classPackage;
 
-
 #if($hasDtoClasses)
 import ${classPackage}.dto.*;
 #end
-import java.util.List;
-import javax.annotation.Generated;
-
+#if($baseClassFullName.length()>0)
 import $baseClassFullName;
+#end
+import $queryExecutorClassFullName;
 #foreach($className in $implementsFullList)
 import ${className};
 #end
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+
+import javax.annotation.Generated;
 import java.util.List;
 import java.util.Map;
 
@@ -23,10 +25,13 @@ import java.util.Map;
     value = "com.github.nds842.sqlfirst.apc.SqlFirstAnnotationProcessor"
 )
 @Repository
-public class ${daoClassName} extends ${baseClassSimpleName} implements #foreach($className in $implementsNameList)
+public class ${daoClassName}#if($baseClassSimpleName.length()>0) extends ${baseClassSimpleName}#end implements #foreach($className in $implementsNameList)
 ${className}#if($foreach.hasNext), #end#end {
 
     private static final String PACKAGE_NAME = "$classPackage";
+
+    @Autowired
+    private $queryExecutorClassName sqlFirstQueryExecutor;
 
 #macro( tr $method )
 #if(${method.hasResponse()})
@@ -43,8 +48,8 @@ ${className}#if($foreach.hasNext), #end#end {
 #foreach ($method in $queryDescList)
 $method.methodJavadoc
     public #if(${method.hasResponse()})List<${method.responseClass()}>#{else}void#end ${method.methodName}(#if(${method.hasRequest()})${method.requestClass()} req#end) {
-#tr()
-        #if(${method.hasResponse()})return super.executeQuery#{else}super.execute#{end}(getTemplate(PACKAGE_NAME, "${method.getMethodNameFirstUpper()}")#if(${method.hasRequest()}), req#{end}#if(${method.hasResponse()}), rowMapper#end);
+#tr($method)
+        #if(${method.hasResponse()})return sqlFirstQueryExecutor.executeQuery#{else}sqlFirstQueryExecutor.execute#{end}(sqlFirstQueryExecutor.getTemplate(PACKAGE_NAME, "${method.getMethodNameFirstUpper()}")#if(${method.hasRequest()}), req#{end}#if(${method.hasResponse()}), rowMapper#end);
     }
 
 #end}

@@ -1,16 +1,15 @@
 package com.github.nds842.sqlfirst.springsample.repository;
 
 
-import com.github.nds842.sqlfirst.apc.DaoType;
 import com.github.nds842.sqlfirst.apc.SqlSource;
-import com.github.nds842.sqlfirst.apc.SqlSourceFile;
 import com.github.nds842.sqlfirst.base.SQLSourceType;
 import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleLetterNoSenderRes;
+import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleLetterReq;
+import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleLetterRes;
 import com.github.nds842.sqlfirst.springsample.repository.dto.InsertSampleLetterReq;
 
 import java.util.List;
 
-@SqlSourceFile(DaoType.SPRING_REPOSITORY)
 public interface LetterRepositoryCustom {
     
     /**

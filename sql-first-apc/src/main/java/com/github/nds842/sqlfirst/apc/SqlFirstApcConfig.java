@@ -12,7 +12,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface SqlFirstApcConfig {
     
-    String baseDaoClassName();
+    DaoType daoType();
+    
+    String baseDaoClassName() default "";
+    
+    String queryExecutorClassName() default "";
     
     String baseDtoClassName() default "com.github.nds842.sqlfirst.base.BaseDto";
     
