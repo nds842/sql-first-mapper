@@ -1,7 +1,6 @@
 SELECT
-    trackcode.id           id__l,
-    trackcode.code         codestring__s,
-    trackcode.parcelid     parcelid__l,
-    trackcode.dateassign   dateassign_d
-FROM trackcode
-WHERE parcelid = :parcelid__l
+    track_code.id           id__l,
+    track_code.track_code   codestring__s,
+    track_code.postage_id   postage_id__l
+FROM track_code
+WHERE track_code.postage_id = :postage_id__l

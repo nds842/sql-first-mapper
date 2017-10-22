@@ -3,7 +3,7 @@ package com.github.nds842.sqlfirst.springsample.repository;
 
 import com.github.nds842.sqlfirst.apc.SqlSource;
 import com.github.nds842.sqlfirst.apc.SqlSourceFile;
-import com.github.nds842.sqlfirst.springsample.model.SenderNameItem;
+import com.github.nds842.sqlfirst.springsample.common.SenderNameItem;
 import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleParcelReq;
 import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleParcelRes;
 import com.github.nds842.sqlfirst.springsample.repository.dto.InsertSampleParcelReq;
@@ -15,6 +15,7 @@ public interface ParcelRepositoryCustom {
     
     /**
      * SELECT
+     * parcel.id              id__l,
      * parcel.height          height__l,
      * parcel.width           width__l,
      * parcel.date_send       send_date__d,

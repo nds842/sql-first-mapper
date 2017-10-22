@@ -1,18 +1,16 @@
 package com.github.nds842.sqlfirst.springsample.model;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
 
 
 @Entity
-public class Parcel {
-    
-    @Id
-    @GeneratedValue
-    private Long id;
+@DiscriminatorValue("parcel")
+@Table(name = "parcel")
+public class Parcel extends Postage {
     
     private Long width;
     
@@ -25,14 +23,6 @@ public class Parcel {
     private Date dateSend;
     
     private Long height;
-    
-    public Long getId() {
-        return id;
-    }
-    
-    public void setId(Long id) {
-        this.id = id;
-    }
     
     public Long getWidth() {
         return width;
