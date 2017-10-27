@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Bean;
 
 @SqlFirstApcConfig(
         daoType = DaoType.SPRING_REPOSITORY,
-        queryExecutorClassName = "com.github.nds842.sqlfirst.springsample.system.SqlFirstSpringQueryExecutor"
+        queryExecutorClassName = "com.github.nds842.sqlfirst.springsample.system.SqlFirstSpringQueryExecutor",
+        baseTest="com.github.nds842.sqlfirst.springsample.BaseTest"
 )
 @SpringBootApplication(
         scanBasePackages = "com.github.nds842.sqlfirst.springsample.system"

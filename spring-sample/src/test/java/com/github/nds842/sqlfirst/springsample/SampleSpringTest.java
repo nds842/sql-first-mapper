@@ -23,8 +23,6 @@ import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleLetterRe
 import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleParcelReq;
 import com.github.nds842.sqlfirst.springsample.repository.dto.FindSampleParcelRes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -32,8 +30,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-@SpringBootTest
-public class SampleSpringTest extends AbstractTransactionalTestNGSpringContextTests {
+
+public class SampleSpringTest extends BaseTest {
     
     @Autowired
     private LetterRepository letterRepository;

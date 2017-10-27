@@ -20,4 +20,5 @@ public @interface SqlFirstApcConfig {
     
     String baseDtoClassName() default "com.github.nds842.sqlfirst.base.BaseDto";
     
+    String baseTest() default "";
 }
