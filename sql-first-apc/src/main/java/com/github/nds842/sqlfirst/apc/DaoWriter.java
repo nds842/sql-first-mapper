@@ -12,12 +12,9 @@ import org.apache.velocity.app.Velocity;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
-import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -138,7 +135,6 @@ public class DaoWriter {
         String packageName = firstElement.getPackageName();
         String daoClassName = className + "Dao";
     
-        String generatedSourcesLocation;
         try {
             context.put("stringUtils", StringUtils.class);
             context.put("hasDtoClasses", queryDescList.stream().anyMatch(queryDesc -> queryDesc.hasRequest() || queryDesc.hasRequest()));
@@ -146,6 +142,7 @@ public class DaoWriter {
             String implementClassName = daoDesc.getImplementClassName();//implementMap.get(packageName + "." + className);
             
             Set<String> implementsSet = new HashSet<>();
+            implementsSet.add(SqlSourceDao.class.getName());
             if (StringUtils.isNotBlank(implementClassName)) {
                 implementsSet.add(implementClassName);
             }
@@ -181,55 +178,25 @@ public class DaoWriter {
             }
     
             processImplementsList(context, implementsSet);
-            String daoTestClassName = daoClassName + "Test";
             context.put("daoClassName", daoClassName);
-            context.put("daoTestClassName", daoTestClassName);
             context.put("classPackage", packageName);
             String daoClassFullName = packageName + "." + daoClassName;
     
-            generatedSourcesLocation = writeDao(context, templateFileName, daoClassFullName);
-            if (daoType == DaoType.SPRING_REPOSITORY && StringUtils.isNotBlank(sqlFirstApcConfig.baseTest())) {
-                context.put("baseTestFullName", sqlFirstApcConfig.baseTest());
-                context.put("baseTestSimpleName", MiscUtils.getLastWordAfterDot(sqlFirstApcConfig.baseTest()));
-                writeDaoTest(context, generatedSourcesLocation, packageName, daoTestClassName);
-            }
+            writeDao(context, templateFileName, daoClassFullName);
+            
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     
     }
     
-    
-    private void writeDaoTest(
-            VelocityContext context,
-            String generatedSourcesLocation,
-            String packageName,
-            String daoTestClassName) throws FileNotFoundException {
-        if (!generatedSourcesLocation.endsWith(TARGET_GENERATED_SOURCES_ANNOTATIONS)) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.MANDATORY_WARNING,
-                    "Can not define source location for tests " + packageName + "." + daoTestClassName + " " + generatedSourcesLocation, globalConfigElement);
-        }
-        
-        String testSourceDir = StringUtils.substring(generatedSourcesLocation, 0, -TARGET_GENERATED_SOURCES_ANNOTATIONS.length())
-                + "/target/generated-test-sources/test-annotations/" + packageName.replace(".", File.separator);
-        new File(testSourceDir).mkdirs();
-        try (PrintWriter writer = new PrintWriter(testSourceDir + File.separator + daoTestClassName + ".java")) {
-            Template template = Velocity.getTemplate("dao-test-spring-template.vm", MiscUtils.UTF_8);
-            template.merge(context, writer);
-        }
-    }
-    
-    private String writeDao(VelocityContext context, String templateFileName, String daoClassFullName) throws IOException {
-        String generatedSourcesLocation;
+    private void writeDao(VelocityContext context, String templateFileName, String daoClassFullName) throws IOException {
         JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(daoClassFullName);
-        
-        generatedSourcesLocation = StringUtils.substring(builderFile.toUri().getPath(), 0, -daoClassFullName.length() - 5);
         
         try (PrintWriter writer = new PrintWriter(builderFile.openWriter())) {
             Template template = Velocity.getTemplate(templateFileName, MiscUtils.UTF_8);
             template.merge(context, writer);
         }
-        return generatedSourcesLocation;
     }
     
     private void processImplementsList(VelocityContext context, Set<String> implementsList) {

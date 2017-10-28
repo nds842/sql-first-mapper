@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * Annotation to map SQL queries
  */
 @Target(ElementType.METHOD)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface SqlSource {
 
     /**
@@ -34,4 +34,11 @@ public @interface SqlSource {
      * @return name of file containing SQL for sqlSourceType == FILE
      */
     String sqlSourceFile() default StringUtils.EMPTY;
+    
+    /**
+     * Should the query be skipped in auto tests
+     *
+     * @return true if skip is required
+     */
+    boolean skipTest() default false;
 }

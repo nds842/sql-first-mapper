@@ -48,4 +48,8 @@ $method.methodJavadoc
         #if(${method.hasResponse()})return super.executeQuery#{else}super.executeUpdate#{end}(getTemplate(PACKAGE_NAME, "${method.getMethodNameFirstUpper()}")#if(${method.hasRequest()}), req#{end}#if(${method.hasResponse()}), tr#end, conn);
     }
 
-#end}
+#end
+    public Class<${daoClassName}> getUnproxiedClass(){
+        return ${daoClassName}.class;
+    }
+}
