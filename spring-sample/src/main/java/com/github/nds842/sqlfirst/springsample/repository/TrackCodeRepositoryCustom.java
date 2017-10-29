@@ -5,8 +5,7 @@ import com.github.nds842.sqlfirst.apc.SqlSourceFile;
 import com.github.nds842.sqlfirst.base.SQLSourceType;
 import com.github.nds842.sqlfirst.springsample.repository.dto.CheckTrackCodeReq;
 import com.github.nds842.sqlfirst.springsample.repository.dto.CheckTrackCodeRes;
-import com.github.nds842.sqlfirst.springsample.repository.dto.InsertTrackCode4Req;
-import com.github.nds842.sqlfirst.springsample.repository.dto.InsertTrackCodeReq;
+import com.github.nds842.sqlfirst.springsample.repository.dto.UpdateTrackCodeReq;
 
 import java.util.List;
 
@@ -20,18 +19,11 @@ public interface TrackCodeRepositoryCustom {
     List<CheckTrackCodeRes> checkTrackCode(CheckTrackCodeReq req);
     
     /**
-     * INSERT into trackcode (id, code, parcelid, dateassign)
-     * VALUES (:id__l,:codestring__s,:parcelid__l,:dateassign_d)
+     * UPDATE track_code SET track_code = :codestring__s
+     * WHERE postage_id = :postage_id__l
      */
     @SqlSource
-    void insertTrackCode(InsertTrackCodeReq req);
-    
-    /**
-     * INSERT into trackcode (id, code, parcelid, dateassign)
-     * VALUES (:id__l,:codestring__s,:parcelid__l,:dateassign_d)
-     */
-    @SqlSource
-    void insertTrackCode4(InsertTrackCode4Req req);
+    void updateTrackCode(UpdateTrackCodeReq req);
     
     /**
      * Method to be implemented in parent of generated repository impl class

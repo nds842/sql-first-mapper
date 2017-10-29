@@ -26,19 +26,25 @@ import java.util.stream.Collectors;
 /**
  * Builder class for Dao classes - writes
  */
-public class DaoWriter {
+class DaoWriter {
     
     /**
      * Reference to ProcessingEnvironment to write files and report errors
      */
     private final ProcessingEnvironment processingEnv;
     
-    public DaoWriter(ProcessingEnvironment processingEnv) {
+    DaoWriter(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
         initVelocity();
     }
-
-    public void write(
+    
+    /**
+     * Write dao classes
+     *
+     * @param daoDescList dao description
+     * @param sqlFirstApcConfig global config
+     */
+    void write(
             List<DaoDesc> daoDescList,
             SqlFirstApcConfig sqlFirstApcConfig
     ) {
@@ -122,8 +128,6 @@ public class DaoWriter {
         
         String baseDaoClassName = StringUtils.isBlank(daoDesc.getBaseDaoClassName()) ? sqlFirstApcConfig.baseDaoClassName() : daoDesc.getBaseDaoClassName();
         
-        
-        
         List<QueryDesc> queryDescList = daoDesc.getQueryDescList();
         QueryDesc firstElement = queryDescList.iterator().next();
         
@@ -139,6 +143,7 @@ public class DaoWriter {
             String implementClassName = daoDesc.getImplementClassName();//implementMap.get(packageName + "." + className);
             
             Set<String> implementsSet = new HashSet<>();
+            implementsSet.add(SqlSourceDao.class.getName());
             if (StringUtils.isNotBlank(implementClassName)) {
                 implementsSet.add(implementClassName);
             }

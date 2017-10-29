@@ -12,12 +12,24 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface SqlFirstApcConfig {
     
+    /**
+     * @return which type of Dao class should be generated
+     */
     DaoType daoType();
     
+    /**
+     * @return Base class for generated if empty - generated class would not extend
+     */
     String baseDaoClassName() default "";
     
+    /**
+     * @return Query executor class name
+     */
     String queryExecutorClassName() default "";
     
+    /**
+     * @return base dao request-response dto class name
+     */
     String baseDtoClassName() default "com.github.nds842.sqlfirst.base.BaseDto";
     
 }

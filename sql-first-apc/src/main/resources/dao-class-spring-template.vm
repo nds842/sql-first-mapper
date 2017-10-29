@@ -52,4 +52,8 @@ $method.methodJavadoc
         #if(${method.hasResponse()})return sqlFirstQueryExecutor.executeQuery#{else}sqlFirstQueryExecutor.execute#{end}(sqlFirstQueryExecutor.getTemplate(PACKAGE_NAME, "${method.getMethodNameFirstUpper()}")#if(${method.hasRequest()}), req#{end}#if(${method.hasResponse()}), rowMapper#end);
     }
 
-#end}
+#end
+    public Class<${daoClassName}> getUnproxiedClass(){
+        return ${daoClassName}.class;
+    }
+}

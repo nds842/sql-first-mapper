@@ -5,8 +5,16 @@ import com.github.nds842.sqlfirst.apc.DaoType;
 
 import java.util.List;
 
+/**
+ * Dao description
+ */
 public class DaoDesc {
+    
+    /**
+     * List of query description elements
+     */
     private List<QueryDesc> queryDescList;
+    
     private String implementClassName;
     private String sourceClassName;
     private String targetClassName;

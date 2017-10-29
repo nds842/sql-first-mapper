@@ -12,13 +12,10 @@ import org.springframework.context.annotation.Bean;
         daoType = DaoType.SPRING_REPOSITORY,
         queryExecutorClassName = "com.github.nds842.sqlfirst.springsample.system.SqlFirstSpringQueryExecutor"
 )
-@SpringBootApplication(
-        scanBasePackages = "com.github.nds842.sqlfirst.springsample.system"
-)
-
+@SpringBootApplication
 public class Application implements CommandLineRunner {
     
-    
+    @SuppressWarnings("unused")
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Application.class, args);
     }

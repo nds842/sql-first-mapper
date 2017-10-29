@@ -45,10 +45,10 @@ public interface LetterRepositoryCustom {
     
     
     /**
-     * INSERT into letter (height,width,date_send,weight,sender_name) VALUES (
-     * :height__l,:width__l,:send_date__d,:weight__l,:sender_name__s)
+     * INSERT into letter (id,height,width,date_send,weight,sender_name) VALUES (
+     * :id__l,:height__l,:width__l,:send_date__d,:weight__l,:sender_name__s)
      */
-    @SqlSource
+    @SqlSource(skipTest = true)
     void insertSampleLetter(InsertSampleLetterReq req);
     
     /**

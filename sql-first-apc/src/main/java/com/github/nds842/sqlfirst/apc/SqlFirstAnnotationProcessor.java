@@ -52,23 +52,30 @@ public class SqlFirstAnnotationProcessor extends AbstractProcessor {
             return false;
         }
     
+        Element globalConfigElement = null;
         try {
-            SqlFirstApcConfig globalConfig = prepareGlobalConfig(roundEnv);
+            globalConfigElement = prepareGlobalConfig(roundEnv);
+            SqlFirstApcConfig globalConfig = globalConfigElement.getAnnotation(SqlFirstApcConfig.class);
             List<DaoDesc> daoDescList = processSqlSource(roundEnv, globalConfig);
-            prepareDaoClassImplementMap(daoDescList, roundEnv);
-        
+    
             if (globalConfig != null) {
+                prepareDaoClassImplementMap(daoDescList, roundEnv);
                 DaoWriter daoWriter = new DaoWriter(processingEnv);
                 daoWriter.write(daoDescList, globalConfig);
             }
             return !daoDescList.isEmpty();
         
         } catch (RuntimeException ex) {
-            roundEnv.getElementsAnnotatedWith(SqlFirstApcConfig.class).forEach(x ->
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, ExceptionUtils.getFullStackTrace(ex), x)
-            );
-            throw ex;
+            if (globalConfigElement == null) {
+                roundEnv.getElementsAnnotatedWith(SqlSource.class).forEach(x ->
+                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, ExceptionUtils.getFullStackTrace(ex), x)
+                );
+            } else {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, ExceptionUtils.getFullStackTrace(ex), globalConfigElement);
+        
+            }
         }
+        return false;
     }
 
     /**
@@ -105,20 +112,19 @@ public class SqlFirstAnnotationProcessor extends AbstractProcessor {
      *
      * @param roundEnv annotation processor environment
      */
-    private SqlFirstApcConfig prepareGlobalConfig(RoundEnvironment roundEnv) {
-        SqlFirstApcConfig sqlFirstApcConfig = null;
+    private Element prepareGlobalConfig(RoundEnvironment roundEnv) {
+        Element sqlFirstApcConfigElement = null;
     
         //TODO read with filer for the case of partial compilation
         Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(SqlFirstApcConfig.class);
         for (Element element : annotatedElements) {
-            SqlFirstApcConfig ann = element.getAnnotation(SqlFirstApcConfig.class);
-            if (sqlFirstApcConfig == null) {
-                sqlFirstApcConfig = ann;
+            if (sqlFirstApcConfigElement == null) {
+                sqlFirstApcConfigElement = element;
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "SqlFirstApcConfig annotation must be declared only once ", element);
             }
         }
-        return sqlFirstApcConfig;
+        return sqlFirstApcConfigElement;
         
     }
     
